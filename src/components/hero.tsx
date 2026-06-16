@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
+import { useSiteActions } from "@/lib/actions/registry";
 
 const Scene3D = dynamic(() => import("@/components/scene-3d"), {
   ssr: false,
@@ -11,6 +12,7 @@ const Scene3D = dynamic(() => import("@/components/scene-3d"), {
 });
 
 export function Hero() {
+  const { runAction } = useSiteActions();
   return (
     <section
       id="top"
@@ -58,18 +60,18 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.25 }}
             className="mt-9 flex flex-col gap-3 sm:flex-row"
           >
-            <a
-              href="#contact"
+            <button
+              onClick={() => runAction("openAppointmentBooking")}
               className="glow rounded-full bg-white px-6 py-3 text-center text-sm font-medium text-black transition-transform hover:scale-105"
             >
-              Start a project
-            </a>
-            <a
-              href="#work"
+              Book a call
+            </button>
+            <button
+              onClick={() => runAction("navigateTo", { section: "work" })}
               className="rounded-full border border-white/15 px-6 py-3 text-center text-sm font-medium text-white transition-colors hover:bg-white/5"
             >
               See the work
-            </a>
+            </button>
           </motion.div>
 
           <motion.div

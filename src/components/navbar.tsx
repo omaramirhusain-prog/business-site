@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useSiteActions } from "@/lib/actions/registry";
 
 const links = [
-  { label: "Work", href: "#work" },
-  { label: "Services", href: "#services" },
-  { label: "Process", href: "#process" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Work", section: "work" },
+  { label: "Services", section: "services" },
+  { label: "Process", section: "process" },
+  { label: "Pricing", section: "pricing" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { runAction } = useSiteActions();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -33,7 +35,14 @@ export function Navbar() {
           scrolled ? "glass mx-4 sm:mx-auto" : "bg-transparent"
         )}
       >
-        <a href="#top" className="group flex items-center gap-2 font-semibold">
+        <a
+          href="#top"
+          onClick={(e) => {
+            e.preventDefault();
+            runAction("navigateTo", { section: "home" });
+          }}
+          className="group flex items-center gap-2 font-semibold"
+        >
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-2 text-sm font-bold text-black">
             O
           </span>
@@ -43,8 +52,12 @@ export function Navbar() {
         <nav className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
           {links.map((l) => (
             <a
-              key={l.href}
-              href={l.href}
+              key={l.section}
+              href={`#${l.section}`}
+              onClick={(e) => {
+                e.preventDefault();
+                runAction("navigateTo", { section: l.section });
+              }}
               className="transition-colors hover:text-white"
             >
               {l.label}
@@ -52,12 +65,12 @@ export function Navbar() {
           ))}
         </nav>
 
-        <a
-          href="#contact"
+        <button
+          onClick={() => runAction("openAppointmentBooking")}
           className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-transform hover:scale-105"
         >
-          Start a project
-        </a>
+          Book a call
+        </button>
       </div>
     </header>
   );

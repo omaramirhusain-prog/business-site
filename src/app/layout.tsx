@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { ChatWidget } from "@/components/chat-widget";
+import { ActionProvider } from "@/lib/actions/registry";
+import { AppointmentModal } from "@/components/appointment-modal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,9 +58,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Navbar />
-        {children}
-        <ChatWidget />
+        <ActionProvider>
+          <Navbar />
+          {children}
+          <AppointmentModal />
+          <ChatWidget />
+        </ActionProvider>
       </body>
     </html>
   );

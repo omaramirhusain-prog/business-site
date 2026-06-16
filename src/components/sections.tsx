@@ -1,5 +1,8 @@
+"use client";
+
 import { Reveal } from "@/components/reveal";
 import { Boxes, Bot, Gauge, Sparkles, Search, Rocket } from "lucide-react";
+import { useSiteActions } from "@/lib/actions/registry";
 
 function SectionHeading({
   eyebrow,
@@ -219,6 +222,7 @@ const tiers = [
 ];
 
 export function Pricing() {
+  const { runAction } = useSiteActions();
   return (
     <section id="pricing" className="relative py-28">
       <div className="mx-auto max-w-6xl px-6">
@@ -258,8 +262,8 @@ export function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <a
-                  href="#contact"
+                <button
+                  onClick={() => runAction("openAppointmentBooking")}
                   className={`mt-8 rounded-full px-5 py-3 text-center text-sm font-medium transition-transform hover:scale-[1.03] ${
                     t.featured
                       ? "bg-white text-black"
@@ -267,7 +271,7 @@ export function Pricing() {
                   }`}
                 >
                   Get a quote
-                </a>
+                </button>
               </div>
             </Reveal>
           ))}
@@ -278,6 +282,7 @@ export function Pricing() {
 }
 
 export function Contact() {
+  const { runAction } = useSiteActions();
   return (
     <section id="contact" className="relative py-28">
       <div className="mx-auto max-w-4xl px-6">
@@ -294,19 +299,17 @@ export function Contact() {
                 corner, or reach me directly.
               </p>
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <a
-                  href="mailto:hello@example.com"
+                <button
+                  onClick={() => runAction("openAppointmentBooking")}
                   className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-transform hover:scale-105"
                 >
-                  Email me
-                </a>
+                  Book a call
+                </button>
                 <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:hello@example.com"
                   className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
                 >
-                  Instagram
+                  Email me
                 </a>
               </div>
             </div>

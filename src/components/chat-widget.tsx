@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { AnimatePresence, motion } from "motion/react";
 import { MessageSquare, X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSiteActions } from "@/lib/actions/registry";
 
 const suggestions = [
   "I need a website for my business",
@@ -13,7 +14,7 @@ const suggestions = [
 ];
 
 export function ChatWidget() {
-  const [open, setOpen] = useState(false);
+  const { chatOpen: open, setChatOpen } = useSiteActions();
   const [input, setInput] = useState("");
   const { messages, sendMessage, status } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -37,7 +38,7 @@ export function ChatWidget() {
   return (
     <>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setChatOpen(!open)}
         aria-label="Open chat assistant"
         className="glow fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-accent to-accent-2 text-black transition-transform hover:scale-110"
       >
