@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { z } from "zod";
+import { actionDefinitions } from "@/lib/actions/definitions";
 
 /**
  * Site Action Registry
@@ -80,55 +81,36 @@ export function ActionProvider({ children }: { children: ReactNode }) {
   const openAppointment = useCallback(() => setAppointmentOpen(true), []);
   const closeAppointment = useCallback(() => setAppointmentOpen(false), []);
 
-  const actions = useMemo<SiteAction[]>(
-    () => [
-      {
-        name: "navigateTo",
-        description:
-          "Scroll the page to a section. Use for requests like 'show pricing', 'take me to contact', 'go to the work/projects', 'go home'.",
-        parameters: z.object({
-          section: z
-            .enum(["home", "services", "work", "process", "pricing", "contact"])
-            .describe("Which section of the site to navigate to."),
-        }),
-        run: (args) => {
-          const section = String(args.section ?? "");
-          navigate(section);
-          return `Navigated to the ${section} section.`;
-        },
+  const actions = useMemo<SiteAction[]>(() => {
+    const handlers: Record<string, SiteAction["run"]> = {
+      navigateTo: (args) => {
+        const section = String(args.section ?? "");
+        navigate(section);
+        return `Navigated to the ${section} section.`;
       },
-      {
-        name: "openAppointmentBooking",
-        description:
-          "Open the appointment booking dialog so the visitor can see available dates and book a call with Omar. Use for 'book an appointment', 'schedule a call', 'set up a meeting'.",
-        parameters: z.object({}),
-        run: () => {
-          openAppointment();
-          return "Opened the appointment booking dialog with available dates.";
-        },
+      openAppointmentBooking: () => {
+        openAppointment();
+        return "Opened the appointment booking dialog with available dates.";
       },
-      {
-        name: "startProject",
-        description:
-          "Take the visitor to the contact/start-a-project area to begin a project with Omar.",
-        parameters: z.object({}),
-        run: () => {
-          navigate("contact");
-          return "Opened the start-a-project / contact area.";
-        },
+      startProject: () => {
+        navigate("contact");
+        return "Opened the start-a-project / contact area.";
       },
-      {
-        name: "openChat",
-        description: "Open the text chat assistant panel.",
-        parameters: z.object({}),
-        run: () => {
-          setChatOpen(true);
-          return "Opened the chat panel.";
-        },
+      openChat: () => {
+        setChatOpen(true);
+        return "Opened the chat panel.";
       },
-    ],
-    [navigate, openAppointment]
-  );
+    };
+
+    return actionDefinitions.map((def) => ({
+      name: def.name,
+      description: def.description,
+      parameters: def.parameters,
+      run:
+        handlers[def.name] ??
+        (() => `No handler registered for action "${def.name}".`),
+    }));
+  }, [navigate, openAppointment]);
 
   const runAction = useCallback(
     async (name: string, args: Record<string, unknown> = {}): Promise<ActionResult> => {

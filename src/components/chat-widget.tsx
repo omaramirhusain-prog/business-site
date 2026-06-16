@@ -2,10 +2,18 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
+import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { AnimatePresence, motion } from "motion/react";
-import { MessageSquare, X, Send, Sparkles } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSiteActions } from "@/lib/actions/registry";
+
+const ACTION_LABELS: Record<string, string> = {
+  navigateTo: "Navigating",
+  openAppointmentBooking: "Opening booking",
+  startProject: "Starting a project",
+  openChat: "Opening chat",
+};
 
 const suggestions = [
   "I need a website for my business",
@@ -14,9 +22,22 @@ const suggestions = [
 ];
 
 export function ChatWidget() {
-  const { chatOpen: open, setChatOpen } = useSiteActions();
+  const { chatOpen: open, setChatOpen, runAction } = useSiteActions();
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status } = useChat();
+  const { messages, sendMessage, status, addToolResult } = useChat({
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      const result = await runAction(
+        toolCall.toolName,
+        (toolCall.input ?? {}) as Record<string, unknown>
+      );
+      addToolResult({
+        tool: toolCall.toolName,
+        toolCallId: toolCall.toolCallId,
+        output: result.message,
+      });
+    },
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const busy = status === "submitted" || status === "streaming";
@@ -106,20 +127,43 @@ export function ChatWidget() {
                   .filter((p) => p.type === "text")
                   .map((p) => (p as { text: string }).text)
                   .join("");
+                const toolNames = m.parts
+                  .filter(
+                    (p) =>
+                      p.type.startsWith("tool-") || p.type === "dynamic-tool"
+                  )
+                  .map((p) =>
+                    p.type === "dynamic-tool"
+                      ? (p as { toolName: string }).toolName
+                      : p.type.replace("tool-", "")
+                  );
+
                 return (
-                  <div
-                    key={m.id}
-                    className={cn(
-                      "max-w-[85%] px-4 py-3 text-sm leading-relaxed",
-                      m.role === "user"
-                        ? "ml-auto rounded-2xl rounded-tr-sm bg-gradient-to-br from-accent to-accent-2 text-black"
-                        : "rounded-2xl rounded-tl-sm bg-white/5 text-zinc-200"
-                    )}
-                  >
-                    {text || (
-                      <span className="inline-flex gap-1">
-                        <Dot /> <Dot delay={0.15} /> <Dot delay={0.3} />
-                      </span>
+                  <div key={m.id} className="space-y-2">
+                    {toolNames.map((name, i) => (
+                      <div
+                        key={`${m.id}-tool-${i}`}
+                        className="flex items-center gap-1.5 text-xs text-accent-2"
+                      >
+                        <Zap className="h-3 w-3" />
+                        {ACTION_LABELS[name] ?? name}
+                      </div>
+                    ))}
+                    {(text || (m.role === "assistant" && toolNames.length === 0)) && (
+                      <div
+                        className={cn(
+                          "max-w-[85%] px-4 py-3 text-sm leading-relaxed",
+                          m.role === "user"
+                            ? "ml-auto rounded-2xl rounded-tr-sm bg-gradient-to-br from-accent to-accent-2 text-black"
+                            : "rounded-2xl rounded-tl-sm bg-white/5 text-zinc-200"
+                        )}
+                      >
+                        {text || (
+                          <span className="inline-flex gap-1">
+                            <Dot /> <Dot delay={0.15} /> <Dot delay={0.3} />
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 );
