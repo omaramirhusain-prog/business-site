@@ -1,18 +1,24 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useChat } from "@ai-sdk/react";
-import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { AnimatePresence, motion } from "motion/react";
 import { MessageSquare, X, Send, Sparkles, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSiteActions } from "@/lib/actions/registry";
+import { useAgent } from "@/components/agent-provider";
+import { extractMessageText } from "@/lib/agent/extract-text";
 
 const ACTION_LABELS: Record<string, string> = {
   navigateTo: "Navigating",
-  openAppointmentBooking: "Opening booking",
-  startProject: "Starting a project",
+  scrollPage: "Scrolling",
   openChat: "Opening chat",
+  closeChat: "Closing chat",
+  openAppointmentBooking: "Opening booking",
+  closeAppointmentBooking: "Closing booking",
+  checkAppointmentAvailability: "Checking availability",
+  selectAppointmentSlot: "Selecting time",
+  confirmAppointment: "Confirming booking",
+  startProject: "Starting a project",
 };
 
 const suggestions = [
@@ -22,22 +28,9 @@ const suggestions = [
 ];
 
 export function ChatWidget() {
-  const { chatOpen: open, setChatOpen, runAction } = useSiteActions();
+  const { chatOpen: open, setChatOpen } = useSiteActions();
+  const { messages, sendMessage, status } = useAgent();
   const [input, setInput] = useState("");
-  const { messages, sendMessage, status, addToolResult } = useChat({
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    async onToolCall({ toolCall }) {
-      const result = await runAction(
-        toolCall.toolName,
-        (toolCall.input ?? {}) as Record<string, unknown>
-      );
-      addToolResult({
-        tool: toolCall.toolName,
-        toolCallId: toolCall.toolCallId,
-        output: result.message,
-      });
-    },
-  });
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const busy = status === "submitted" || status === "streaming";
@@ -92,7 +85,7 @@ export function ChatWidget() {
               <div>
                 <div className="text-sm font-semibold">Omar&apos;s Assistant</div>
                 <div className="text-xs text-zinc-400">
-                  Tell me about your project
+                  Text or voice — ask me anything
                 </div>
               </div>
             </div>
@@ -105,8 +98,8 @@ export function ChatWidget() {
                 <div className="space-y-4">
                   <div className="rounded-2xl rounded-tl-sm bg-white/5 px-4 py-3 text-sm text-zinc-200">
                     Hey, I&apos;m Omar&apos;s AI assistant. I can help scope your
-                    website, answer questions, and set up a chat with Omar. What
-                    are you looking to build?
+                    website, navigate the site, book a call, and answer questions.
+                    Use the mic on the bottom left, or type here.
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {suggestions.map((s) => (
@@ -123,10 +116,7 @@ export function ChatWidget() {
               )}
 
               {messages.map((m) => {
-                const text = m.parts
-                  .filter((p) => p.type === "text")
-                  .map((p) => (p as { text: string }).text)
-                  .join("");
+                const text = extractMessageText(m);
                 const toolNames = m.parts
                   .filter(
                     (p) =>

@@ -1,50 +1,35 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { X, Calendar, Check } from "lucide-react";
+import { X, Calendar, Check, Loader2 } from "lucide-react";
 import { useSiteActions } from "@/lib/actions/registry";
 
-/** Mock availability for now. Phase D swaps this for Google Calendar. */
-function getAvailableSlots() {
-  const slots: { date: string; label: string; times: string[] }[] = [];
-  const times = ["10:00 AM", "1:00 PM", "3:30 PM"];
-  const now = new Date();
-  let added = 0;
-  let offset = 1;
-  while (added < 5) {
-    const d = new Date(now);
-    d.setDate(now.getDate() + offset);
-    offset++;
-    const day = d.getDay();
-    if (day === 0 || day === 6) continue; // weekdays only
-    slots.push({
-      date: d.toISOString().slice(0, 10),
-      label: d.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      }),
-      times,
-    });
-    added++;
-  }
-  return slots;
-}
-
 export function AppointmentModal() {
-  const { appointmentOpen, closeAppointment } = useSiteActions();
-  const slots = useMemo(getAvailableSlots, []);
-  const [date, setDate] = useState<string | null>(null);
-  const [time, setTime] = useState<string | null>(null);
-  const [booked, setBooked] = useState(false);
+  const {
+    appointmentOpen,
+    appointmentSlots,
+    appointmentSlotsLoading,
+    appointmentDate,
+    appointmentTime,
+    appointmentBooked,
+    appointmentBooking,
+    closeAppointment,
+    runAction,
+    selectAppointmentDay,
+  } = useSiteActions();
 
-  const activeDay = slots.find((s) => s.date === date);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
-  function reset() {
-    setDate(null);
-    setTime(null);
-    setBooked(false);
+  const activeDay = appointmentSlots.find((s) => s.date === appointmentDate);
+
+  async function confirmBooking() {
+    if (!name.trim() || !email.trim()) return;
+    await runAction("confirmAppointment", {
+      name: name.trim(),
+      email: email.trim(),
+    });
   }
 
   return (
@@ -58,10 +43,7 @@ export function AppointmentModal() {
         >
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => {
-              closeAppointment();
-              setTimeout(reset, 250);
-            }}
+            onClick={() => closeAppointment()}
           />
           <motion.div
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -78,11 +60,8 @@ export function AppointmentModal() {
                 <span className="font-semibold">Book a call with Omar</span>
               </div>
               <button
-                aria-label="Close"
-                onClick={() => {
-                  closeAppointment();
-                  setTimeout(reset, 250);
-                }}
+                aria-label="Close booking"
+                onClick={() => closeAppointment()}
                 className="grid h-8 w-8 place-items-center rounded-full text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -90,20 +69,17 @@ export function AppointmentModal() {
             </div>
 
             <div className="p-6">
-              {booked ? (
+              {appointmentBooked ? (
                 <div className="py-8 text-center">
                   <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-green-500/15 text-green-400">
                     <Check className="h-7 w-7" />
                   </div>
                   <h3 className="text-xl font-semibold">You&apos;re booked!</h3>
                   <p className="mt-2 text-sm text-zinc-400">
-                    {activeDay?.label} at {time}. Omar will confirm by email.
+                    {activeDay?.label} at {appointmentTime}. Check your email for confirmation.
                   </p>
                   <button
-                    onClick={() => {
-                      closeAppointment();
-                      setTimeout(reset, 250);
-                    }}
+                    onClick={() => closeAppointment()}
                     className="mt-6 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black"
                   >
                     Done
@@ -112,35 +88,45 @@ export function AppointmentModal() {
               ) : (
                 <>
                   <p className="mb-4 text-sm text-zinc-400">
-                    Pick a day and time that works for you.
+                    Pick a day and time, or say it out loud — e.g. &ldquo;Tuesday at 2pm&rdquo;.
                   </p>
-                  <div className="mb-5 flex flex-wrap gap-2">
-                    {slots.map((s) => (
-                      <button
-                        key={s.date}
-                        onClick={() => {
-                          setDate(s.date);
-                          setTime(null);
-                        }}
-                        className={`rounded-xl border px-3 py-2 text-sm transition-colors ${
-                          date === s.date
-                            ? "border-accent bg-accent/15 text-white"
-                            : "border-white/10 text-zinc-300 hover:border-white/25"
-                        }`}
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
+
+                  {appointmentSlotsLoading ? (
+                    <div className="mb-6 flex items-center gap-2 text-sm text-zinc-400">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading availability…
+                    </div>
+                  ) : (
+                    <div className="mb-5 flex flex-wrap gap-2">
+                      {appointmentSlots.map((s) => (
+                        <button
+                          key={s.date}
+                          onClick={() => selectAppointmentDay(s.date)}
+                          className={`rounded-xl border px-3 py-2 text-sm transition-colors ${
+                            appointmentDate === s.date
+                              ? "border-accent bg-accent/15 text-white"
+                              : "border-white/10 text-zinc-300 hover:border-white/25"
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {activeDay && (
                     <div className="mb-6 flex flex-wrap gap-2">
                       {activeDay.times.map((t) => (
                         <button
                           key={t}
-                          onClick={() => setTime(t)}
+                          onClick={() => {
+                            void runAction("selectAppointmentSlot", {
+                              date: activeDay.date,
+                              time: t,
+                            });
+                          }}
                           className={`rounded-xl border px-3 py-2 text-sm transition-colors ${
-                            time === t
+                            appointmentTime === t
                               ? "border-accent bg-accent/15 text-white"
                               : "border-white/10 text-zinc-300 hover:border-white/25"
                           }`}
@@ -151,13 +137,52 @@ export function AppointmentModal() {
                     </div>
                   )}
 
+                  {appointmentDate && appointmentTime && (
+                    <div className="mb-4 space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                      <p className="text-sm text-zinc-300">
+                        {activeDay?.label} at {appointmentTime}
+                      </p>
+                      <input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        className="w-full rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-zinc-500"
+                      />
+                      <input
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                        placeholder="Your email"
+                        className="w-full rounded-xl border border-white/10 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-zinc-500"
+                      />
+                    </div>
+                  )}
+
                   <button
-                    disabled={!date || !time}
-                    onClick={() => setBooked(true)}
+                    disabled={
+                      !appointmentDate ||
+                      !appointmentTime ||
+                      !name.trim() ||
+                      !email.trim() ||
+                      appointmentBooking
+                    }
+                    onClick={() => void confirmBooking()}
                     className="w-full rounded-full bg-white px-5 py-3 text-sm font-medium text-black transition-transform hover:scale-[1.02] disabled:opacity-40"
                   >
-                    {date && time ? `Book ${activeDay?.label} at ${time}` : "Select a date and time"}
+                    {appointmentBooking ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Booking…
+                      </span>
+                    ) : appointmentDate && appointmentTime ? (
+                      "Confirm booking"
+                    ) : (
+                      "Select a date and time"
+                    )}
                   </button>
+                  <p className="mt-3 text-center text-xs text-zinc-500">
+                    Or say your name and email out loud after picking a time.
+                  </p>
                 </>
               )}
             </div>

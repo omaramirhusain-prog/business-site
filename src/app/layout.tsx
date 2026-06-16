@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { ChatWidget } from "@/components/chat-widget";
+import { VoiceAgent } from "@/components/voice-agent";
+import { AgentProvider } from "@/components/agent-provider";
 import { ActionProvider } from "@/lib/actions/registry";
 import { AppointmentModal } from "@/components/appointment-modal";
 
@@ -59,10 +61,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ActionProvider>
-          <Navbar />
-          {children}
-          <AppointmentModal />
-          <ChatWidget />
+          <AgentProvider>
+            <Navbar />
+            {children}
+            <AppointmentModal />
+            <VoiceAgent />
+            <ChatWidget />
+          </AgentProvider>
         </ActionProvider>
       </body>
     </html>
