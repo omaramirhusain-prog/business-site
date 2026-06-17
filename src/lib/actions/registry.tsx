@@ -14,12 +14,17 @@ import {
   runAction,
   scrollPage as scrollPageFn,
   scrollToSection,
+  highlightElementByVoiceId,
+  useGuidedTour,
+  getVoiceControl,
   type ActionResult,
   type SiteAction,
 } from "@ais-os/site-agent";
 import { actionDefinitions } from "@/lib/actions/definitions";
 import { SECTIONS, createSiteHandlers } from "@/lib/actions/handlers";
 import type { AppointmentSlot } from "@/lib/calendar/types";
+import { useSceneControls } from "@/components/scene-context";
+import { siteTourSteps } from "@/lib/tour-config";
 
 export { SECTIONS };
 
@@ -53,6 +58,7 @@ async function fetchAppointmentSlots(): Promise<AppointmentSlot[]> {
 }
 
 export function ActionProvider({ children }: { children: ReactNode }) {
+  const { applySceneControl } = useSceneControls();
   const [appointmentOpen, setAppointmentOpen] = useState(false);
   const [appointmentSlots, setAppointmentSlots] = useState<AppointmentSlot[]>([]);
   const [appointmentSlotsLoading, setAppointmentSlotsLoading] = useState(false);
@@ -111,6 +117,22 @@ export function ActionProvider({ children }: { children: ReactNode }) {
     setAppointmentBooked(false);
   }, []);
 
+  const { startTour } = useGuidedTour({
+    steps: siteTourSteps,
+    navigate,
+    highlight: (voiceId) => {
+      highlightElementByVoiceId(voiceId);
+    },
+    speak: async (text) => {
+      const vc = getVoiceControl();
+      if (vc) {
+        await vc.speakDirect(text);
+      }
+    },
+  });
+
+  const startGuidedTour = useCallback(async () => startTour(), [startTour]);
+
   const actions = useMemo<SiteAction[]>(() => {
     const handlers = createSiteHandlers({
       navigate,
@@ -132,6 +154,8 @@ export function ActionProvider({ children }: { children: ReactNode }) {
       setAppointmentTime,
       setAppointmentBooked,
       setAppointmentBooking,
+      startGuidedTour,
+      applySceneControl,
     });
     return createActionsFromDefinitions(actionDefinitions, handlers);
   }, [
@@ -147,6 +171,8 @@ export function ActionProvider({ children }: { children: ReactNode }) {
     openAppointment,
     closeAppointment,
     loadSlots,
+    startGuidedTour,
+    applySceneControl,
   ]);
 
   const runActionFn = useCallback(

@@ -1,0 +1,43 @@
+# Omar Husain — Premium Websites with 3D & AI
+
+> Voice-first portfolio and lead engine. The site demonstrates the same AI + 3D stack built for clients.
+
+## Site
+
+- Home: https://omar-web-five.vercel.app/
+- Contact email: omar.oi.web@gmail.com
+
+## Sections
+
+- **Home / Hero** — 3D interactive scene, voice assistant intro
+- **Services** — 3D & motion, integrated AI, performance, design & UX
+- **Work** — portfolio / case studies
+- **Process** — discovery, design & build, launch & grow
+- **Pricing** — Landing, Signature (flagship), Custom tiers (scoped per project)
+- **FAQ** — pricing, timeline, process, AI assistants
+- **Contact** — book a call or email
+
+## Voice & chat capabilities
+
+The AI assistant can:
+
+- Navigate any section by voice ("show pricing", "go to contact")
+- Read section content aloud
+- Highlight pricing tiers and service cards
+- Run a guided site tour ("give me a tour")
+- Book discovery calls via Google Calendar
+- Capture project leads (name, email, message)
+- Control the 3D hero scene (speed, color)
+- Answer FAQ questions
+
+## Booking
+
+- Weekday slots: 10:00 AM, 1:00 PM, 3:30 PM (America/New_York)
+- Book via voice, chat, or the appointment modal
+- Confirmation emails via Resend
+
+## Tech
+
+- Next.js, React Three Fiber, @ais-os/site-agent
+- Claude (chat/tools), ElevenLabs (TTS), Web Speech API / Whisper STT fallback
+- Google Calendar, Resend

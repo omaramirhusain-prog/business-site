@@ -23,6 +23,27 @@ function buildStartPatterns(names: string[] = []) {
   ];
 }
 
+const STOP_SPEAKING_PATTERNS = [
+  /^(\s*(ok(ay)?|alright),?\s*)?(stop|pause|quiet|shush|hold on|wait)\s*(talking|speaking)?\s*\.?$/i,
+  /^stop\s*\.?$/i,
+  /^be quiet\s*\.?$/i,
+];
+
+const REPEAT_PATTERNS = [
+  /^(say that again|repeat( that)?|what did you say|come again)\s*\.?$/i,
+  /^repeat\s*\.?$/i,
+];
+
+export function isStopSpeakingCommand(text: string): boolean {
+  const t = text.trim();
+  return STOP_SPEAKING_PATTERNS.some((p) => p.test(t));
+}
+
+export function isRepeatCommand(text: string): boolean {
+  const t = text.trim();
+  return REPEAT_PATTERNS.some((p) => p.test(t));
+}
+
 export function isEndConversationCommand(text: string): boolean {
   const t = text.trim();
   return DEFAULT_END_PATTERNS.some((p) => p.test(t));

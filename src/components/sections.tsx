@@ -4,6 +4,7 @@ import { Reveal } from "@/components/reveal";
 import { Boxes, Bot, Gauge, Sparkles, Search, Rocket } from "lucide-react";
 import { useSiteActions } from "@/lib/actions/registry";
 import { siteConfig } from "@/lib/site-config";
+import { siteFaq } from "@/lib/faq";
 
 function SectionHeading({
   eyebrow,
@@ -33,21 +34,25 @@ const services = [
   {
     icon: Boxes,
     title: "3D & Motion",
+    voiceId: "service-3d",
     body: "Real-time 3D scenes, scroll-driven animation, and micro-interactions that make a site feel alive.",
   },
   {
     icon: Bot,
     title: "Integrated AI",
+    voiceId: "service-ai",
     body: "AI agents built into the site itself: assistants that answer, qualify, and convert visitors 24/7.",
   },
   {
     icon: Gauge,
     title: "Performance",
+    voiceId: "service-performance",
     body: "Fast where it counts. Optimized 3D, smart loading, and clean code that scores high on Lighthouse.",
   },
   {
     icon: Sparkles,
     title: "Design & UX",
+    voiceId: "service-design",
     body: "Modern, considered interfaces. Every pixel and transition earns its place.",
   },
 ];
@@ -67,7 +72,12 @@ export function Services() {
         <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => (
             <Reveal key={s.title} delay={i * 0.08}>
-              <div className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:border-accent/40 hover:bg-white/[0.04]">
+              <div
+                data-voice-id={s.voiceId}
+                data-voice-label={s.title}
+                aria-label={`${s.title} service`}
+                className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:border-accent/40 hover:bg-white/[0.04]"
+              >
                 <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-accent/20 to-accent-2/20 text-accent">
                   <s.icon className="h-5 w-5" />
                 </div>
@@ -195,6 +205,7 @@ export function Process() {
 const tiers = [
   {
     name: "Landing",
+    voiceId: "tier-landing",
     price: "Let's talk",
     desc: "A single, stunning page. 3D hero, motion, and a contact flow.",
     features: ["One-page site", "3D hero + motion", "Mobile-perfect", "Basic SEO"],
@@ -202,6 +213,7 @@ const tiers = [
   },
   {
     name: "Signature",
+    voiceId: "tier-signature",
     price: "Let's talk",
     desc: "A full multi-page site with an integrated AI assistant. The flagship.",
     features: [
@@ -215,6 +227,7 @@ const tiers = [
   },
   {
     name: "Custom",
+    voiceId: "tier-custom",
     price: "Let's talk",
     desc: "Something ambitious? Web apps, dashboards, deeper AI. Scoped to you.",
     features: ["Web apps", "Advanced AI agents", "Integrations", "Ongoing support"],
@@ -239,6 +252,9 @@ export function Pricing() {
           {tiers.map((t, i) => (
             <Reveal key={t.name} delay={i * 0.08}>
               <div
+                data-voice-id={t.voiceId}
+                data-voice-label={`${t.name} pricing tier`}
+                aria-label={`${t.name} pricing tier`}
                 className={`relative flex h-full flex-col rounded-3xl border p-7 ${
                   t.featured
                     ? "glow border-accent/50 bg-gradient-to-b from-accent/[0.08] to-transparent"
@@ -265,6 +281,7 @@ export function Pricing() {
                 </ul>
                 <button
                   onClick={() => runAction("openAppointmentBooking")}
+                  aria-label={`Get a quote for ${t.name} tier`}
                   className={`mt-8 rounded-full px-5 py-3 text-center text-sm font-medium transition-transform hover:scale-[1.03] ${
                     t.featured
                       ? "bg-white text-black"
@@ -274,6 +291,40 @@ export function Pricing() {
                   Get a quote
                 </button>
               </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function Faq() {
+  return (
+    <section id="faq" className="relative py-28">
+      <div className="mx-auto max-w-3xl px-6">
+        <Reveal>
+          <SectionHeading
+            eyebrow="FAQ"
+            title="Common questions"
+            subtitle="Ask the voice assistant anything — or browse below."
+          />
+        </Reveal>
+
+        <div className="mt-16 space-y-4">
+          {siteFaq.map((item, i) => (
+            <Reveal key={item.id} delay={i * 0.06}>
+              <details
+                data-voice-id={`faq-${item.id}`}
+                className="group rounded-2xl border border-white/10 bg-white/[0.02] p-5 open:border-accent/30"
+              >
+                <summary className="cursor-pointer list-none text-lg font-medium marker:hidden">
+                  {item.question}
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                  {item.answer}
+                </p>
+              </details>
             </Reveal>
           ))}
         </div>

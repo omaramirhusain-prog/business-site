@@ -37,9 +37,53 @@ export function inferActionsFromUserText(text: string): InferredAction[] {
   const t = text.toLowerCase();
   const actions: InferredAction[] = [];
 
+  if (/\b(say that again|repeat|what did you say|come again)\b/.test(t)) {
+    actions.push({ name: "repeatLast", args: {} });
+    return actions;
+  }
+
+  if (/\b(stop talking|be quiet|hold on|stop speaking|pause)\b/.test(t)) {
+    actions.push({ name: "stopSpeaking", args: {} });
+    return actions;
+  }
+
+  if (/\b(give me a tour|show me around|site tour|guided tour)\b/.test(t)) {
+    actions.push({ name: "startGuidedTour", args: {} });
+  }
+
+  if (/\b(read (the )?|what's on the |tell me about the )\b/.test(t)) {
+    if (/\bpric/.test(t)) {
+      actions.push({ name: "readSection", args: { section: "pricing" } });
+    } else if (/\bservice/.test(t)) {
+      actions.push({ name: "readSection", args: { section: "services" } });
+    } else if (/\bfaq|question/.test(t)) {
+      actions.push({ name: "readSection", args: { section: "faq" } });
+    }
+  }
+
+  if (/\b(signature|most popular)\b/.test(t) && /\b(show|tell|about|highlight)\b/.test(t)) {
+    actions.push({ name: "highlightElement", args: { voiceId: "tier-signature" } });
+  } else if (/\blanding\b/.test(t) && /\b(tier|plan|package)\b/.test(t)) {
+    actions.push({ name: "highlightElement", args: { voiceId: "tier-landing" } });
+  } else if (/\bcustom\b/.test(t) && /\b(tier|plan|package)\b/.test(t)) {
+    actions.push({ name: "highlightElement", args: { voiceId: "tier-custom" } });
+  }
+
+  if (/\b(spin|faster|slower|calmer|color|scene|blob|3d)\b/.test(t)) {
+    const sceneArgs: Record<string, unknown> = {};
+    if (/\bfaster\b/.test(t)) sceneArgs.spinSpeed = 2.2;
+    if (/\bslower|calmer\b/.test(t)) sceneArgs.spinSpeed = 0.7;
+    if (/\bblue\b/.test(t)) sceneArgs.color = "blue";
+    if (/\bpurple|violet\b/.test(t)) sceneArgs.color = "purple";
+    if (/\bcyan\b/.test(t)) sceneArgs.color = "cyan";
+    if (Object.keys(sceneArgs).length > 0) {
+      actions.push({ name: "controlScene", args: sceneArgs });
+    }
+  }
+
   const wantsNav =
     /\b(show|see|go|take|navigate|scroll|open|view|bring|jump)\b/.test(t) ||
-    /\b(where|what).*(pric|cost|plan|service|work|portfolio|process|contact)\b/.test(t);
+    /\b(where|what).*(pric|cost|plan|service|work|portfolio|process|contact|faq)\b/.test(t);
 
   if (/\b(home|top|start|beginning)\b/.test(t) && wantsNav) {
     actions.push({ name: "navigateTo", args: { section: "home" } });
@@ -51,6 +95,8 @@ export function inferActionsFromUserText(text: string): InferredAction[] {
     actions.push({ name: "navigateTo", args: { section: "services" } });
   } else if (/\b(process|how it works|how we work|how you work)\b/.test(t)) {
     actions.push({ name: "navigateTo", args: { section: "process" } });
+  } else if (/\b(faq|frequently asked|common questions)\b/.test(t)) {
+    actions.push({ name: "navigateTo", args: { section: "faq" } });
   } else if (/\b(contact|get in touch|reach you|email you)\b/.test(t)) {
     actions.push({ name: "navigateTo", args: { section: "contact" } });
   }
@@ -68,6 +114,27 @@ export function inferActionsFromUserText(text: string): InferredAction[] {
   }
   if (/\b(close|hide|minimize)\s+(the\s+)?chat\b/.test(t)) {
     actions.push({ name: "closeChat", args: {} });
+  }
+
+  if (/\bwhat did i book|my appointment|booking status\b/.test(t)) {
+    actions.push({ name: "getBookingStatus", args: {} });
+  }
+
+  if (/\b(reschedule|move my appointment|change my appointment)\b/.test(t)) {
+    const slot = extractSlotFromText(text);
+    if (slot) {
+      actions.push({
+        name: "rescheduleAppointment",
+        args: { date: slot.date, time: slot.time },
+      });
+    }
+  }
+
+  if (
+    /\b(cancel my booking|cancel my appointment|cancel the booking)\b/.test(t) &&
+    !/\b(dialog|modal)\b/.test(t)
+  ) {
+    actions.push({ name: "cancelAppointment", args: {} });
   }
 
   if (
@@ -117,8 +184,38 @@ export function inferActionsFromUserText(text: string): InferredAction[] {
     });
   }
 
+  if (
+    email &&
+    (/\bproject\b/.test(t) || /\bneed a (site|website)\b/.test(t) || /\bget in touch\b/.test(t))
+  ) {
+    const nameMatch = text.match(/\bmy name is\s+([a-z][a-z\s'-]{1,40})/i);
+    const message = text.replace(/\bmy name is\s+[a-z\s'-]+/i, "").trim() || text;
+    actions.push({
+      name: "submitLead",
+      args: {
+        name: nameMatch?.[1]?.trim() ?? "Visitor",
+        email,
+        message,
+      },
+    });
+  }
+
+  if (/\b(email omar|send an email)\b/.test(t)) {
+    actions.push({ name: "openExternalLink", args: { target: "email" } });
+  }
+  if (/\binstagram\b/.test(t) && /\b(open|show|go)\b/.test(t)) {
+    actions.push({ name: "openExternalLink", args: { target: "instagram" } });
+  }
+
   if (/\b(start a project|start project|new project|hire you)\b/.test(t)) {
     actions.push({ name: "startProject", args: {} });
+  }
+
+  if (
+    /\b(how much|how long|timeline|what do you build|voice assistant)\b/.test(t) &&
+  !actions.some((a) => a.name === "navigateTo")
+  ) {
+    actions.push({ name: "getFAQAnswer", args: { question: text } });
   }
 
   return actions;

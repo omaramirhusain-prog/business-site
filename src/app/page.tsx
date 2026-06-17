@@ -4,6 +4,7 @@ import {
   Work,
   Process,
   Pricing,
+  Faq,
   Contact,
   Footer,
 } from "@/components/sections";
@@ -16,6 +17,7 @@ export default function Home() {
       <Work />
       <Process />
       <Pricing />
+      <Faq />
       <Contact />
       <Footer />
     </main>

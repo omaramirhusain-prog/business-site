@@ -20,10 +20,26 @@ export {
 export {
   isEndConversationCommand,
   isStartConversationCommand,
+  isStopSpeakingCommand,
+  isRepeatCommand,
   VOICE_HINT_END,
   VOICE_HINT_START,
   type VoiceCommandConfig,
 } from "./voice-commands";
+export {
+  registerVoiceControl,
+  getVoiceControl,
+  type VoiceControlApi,
+} from "./voice-control";
+export { splitIntoSentences, StreamingTtsPlayer } from "./streaming-tts";
+export { highlightElementByVoiceId } from "./highlight-element";
+export { readSectionText } from "./read-section";
+export { useGuidedTour, type GuidedTourStep, type UseGuidedTourOptions } from "./use-guided-tour";
+export {
+  useVoiceProactivePrompts,
+  type ProactivePromptConfig,
+} from "./use-voice-proactive-prompts";
+export { prefersServerStt } from "./use-speech-recognition";
 export {
   createAgentProvider,
   type CreateAgentProviderOptions,

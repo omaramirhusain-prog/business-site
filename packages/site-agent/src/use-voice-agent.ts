@@ -9,10 +9,14 @@ import {
 } from "./extract-text";
 import {
   isEndConversationCommand,
+  isRepeatCommand,
   isStartConversationCommand,
+  isStopSpeakingCommand,
   VOICE_HINT_END,
   VOICE_HINT_START,
 } from "./voice-commands";
+import { StreamingTtsPlayer } from "./streaming-tts";
+import { registerVoiceControl } from "./voice-control";
 
 export type VoicePhase = "idle" | "listening" | "thinking" | "speaking";
 
@@ -26,8 +30,11 @@ export type UseVoiceAgentConfig = {
   useOpenChat?: () => (open: boolean) => void;
   getToolConfirmation: (messages: UIMessage[]) => string | null;
   ttsEndpoint?: string;
+  sttEndpoint?: string;
   voiceCommandNames?: string[];
   awaitingStartHint?: string;
+  enableBargeIn?: boolean;
+  speechRate?: number;
 };
 
 const MIC_ERROR_MESSAGES: Record<string, string> = {
@@ -37,7 +44,7 @@ const MIC_ERROR_MESSAGES: Record<string, string> = {
   aborted: "",
 };
 
-function speakWithBrowser(text: string): Promise<void> {
+function speakWithBrowser(text: string, rate = 1): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined" || !window.speechSynthesis) {
       reject(new Error("Speech synthesis unavailable"));
@@ -45,7 +52,7 @@ function speakWithBrowser(text: string): Promise<void> {
     }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1;
+    utterance.rate = rate;
     utterance.pitch = 1;
     utterance.onend = () => resolve();
     utterance.onerror = () => reject(new Error("Speech synthesis failed"));
@@ -55,36 +62,18 @@ function speakWithBrowser(text: string): Promise<void> {
 
 export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
   const ttsEndpoint = config.ttsEndpoint ?? "/api/tts";
+  const sttEndpoint = config.sttEndpoint ?? "/api/stt";
   const awaitingStartHint =
     config.awaitingStartHint ?? "Tap anywhere on the page to start talking";
-
-  async function speakWithElevenLabs(text: string): Promise<boolean> {
-    const res = await fetch(ttsEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-    if (!res.ok) return false;
-
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const audio = new Audio(url);
-        audio.onended = () => resolve();
-        audio.onerror = () => reject(new Error("Audio playback failed"));
-        void audio.play().catch(reject);
-      });
-      return true;
-    } finally {
-      URL.revokeObjectURL(url);
-    }
-  }
+  const enableBargeIn = config.enableBargeIn !== false;
+  const speechRate = config.speechRate ?? 1;
 
   return function useVoiceAgent() {
     const { messages, sendMessage, status, error: chatError } = config.useAgent();
     const setChatOpen = config.useOpenChat?.();
-    const { supported, listening, interim, start, stop } = useSpeechRecognition();
+    const { supported, listening, interim, start, stop } = useSpeechRecognition({
+      sttEndpoint,
+    });
 
     const [phase, setPhase] = useState<VoicePhase>("idle");
     const [inConversation, setInConversation] = useState(false);
@@ -97,12 +86,16 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
     const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const thinkingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const resumeListenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const ttsPlayerRef = useRef<StreamingTtsPlayer | null>(null);
+    const lastSpokenTextRef = useRef<string | null>(null);
+    const bargeInRecognitionRef = useRef<SpeechRecognition | null>(null);
 
     const beginListeningRef = useRef<() => void>(() => {});
     const endConversationRef = useRef<(silent?: boolean) => void>(() => {});
     const startConversationRef = useRef<() => void>(() => {});
     const busyRef = useRef(false);
     const userGestureRef = useRef(false);
+    const speakingRef = useRef(false);
 
     const busy = status === "submitted" || status === "streaming";
     busyRef.current = busy;
@@ -121,11 +114,20 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       }
     }, []);
 
+    const stopBargeInListener = useCallback(() => {
+      bargeInRecognitionRef.current?.stop();
+      bargeInRecognitionRef.current = null;
+    }, []);
+
     const cancelSpeech = useCallback(() => {
+      speakingRef.current = false;
+      ttsPlayerRef.current?.cancel();
+      ttsPlayerRef.current = null;
+      stopBargeInListener();
       if (typeof window !== "undefined") {
         window.speechSynthesis?.cancel();
       }
-    }, []);
+    }, [stopBargeInListener]);
 
     const clearFallbackTimer = useCallback(() => {
       if (fallbackTimerRef.current) {
@@ -140,11 +142,22 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
 
       resumeListenTimerRef.current = setTimeout(() => {
         resumeListenTimerRef.current = null;
-        if (inConversationRef.current && !voiceTurnRef.current) {
+        if (inConversationRef.current && !voiceTurnRef.current && !speakingRef.current) {
           beginListeningRef.current();
         }
       }, 450);
     }, [clearResumeListenTimer]);
+
+    const interruptSpeaking = useCallback(() => {
+      if (!speakingRef.current) return false;
+      cancelSpeech();
+      setPhase("idle");
+      setVoiceError(null);
+      if (inConversationRef.current) {
+        scheduleResumeListening();
+      }
+      return true;
+    }, [cancelSpeech, scheduleResumeListening]);
 
     const endConversation = useCallback(
       (silent = false) => {
@@ -160,10 +173,10 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
         setVoiceError(null);
 
         if (!silent) {
-          void speakWithBrowser("Conversation ended.");
+          void speakWithBrowser("Conversation ended.", speechRate);
         }
       },
-      [stop, cancelSpeech, clearFallbackTimer, clearThinkingTimeout, clearResumeListenTimer]
+      [stop, cancelSpeech, clearFallbackTimer, clearThinkingTimeout, clearResumeListenTimer, speechRate]
     );
 
     endConversationRef.current = endConversation;
@@ -185,21 +198,79 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       [clearFallbackTimer, clearThinkingTimeout, scheduleResumeListening]
     );
 
+    const startBargeInListener = useCallback(() => {
+      if (!enableBargeIn || typeof window === "undefined") return;
+
+      const w = window as Window & {
+        SpeechRecognition?: new () => SpeechRecognition;
+        webkitSpeechRecognition?: new () => SpeechRecognition;
+      };
+      const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+      if (!Ctor) return;
+
+      stopBargeInListener();
+      const recognition = new Ctor();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        if (!speakingRef.current) return;
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const chunk = event.results[i][0]?.transcript?.trim() ?? "";
+          if (chunk.length >= 3) {
+            interruptSpeaking();
+            break;
+          }
+        }
+      };
+
+      recognition.onerror = () => {
+        stopBargeInListener();
+      };
+
+      recognition.onend = () => {
+        if (speakingRef.current && inConversationRef.current) {
+          try {
+            recognition.start();
+          } catch {
+            /* mic busy */
+          }
+        }
+      };
+
+      try {
+        recognition.start();
+        bargeInRecognitionRef.current = recognition;
+      } catch {
+        /* mic may be busy */
+      }
+    }, [enableBargeIn, interruptSpeaking, stopBargeInListener]);
+
     const speak = useCallback(
       async (text: string) => {
         clearFallbackTimer();
         cancelSpeech();
+        lastSpokenTextRef.current = text;
+        speakingRef.current = true;
         setPhase("speaking");
         setVoiceError(null);
 
+        const player = new StreamingTtsPlayer({
+          ttsEndpoint,
+          speechRate,
+          onError: () => setVoiceError("Could not play voice response."),
+        });
+        ttsPlayerRef.current = player;
+        startBargeInListener();
+
         try {
-          const usedElevenLabs = await speakWithElevenLabs(text);
-          if (!usedElevenLabs) {
-            await speakWithBrowser(text);
-          }
-        } catch {
-          setVoiceError("Could not play voice response.");
+          await player.speak(text);
         } finally {
+          speakingRef.current = false;
+          stopBargeInListener();
+          ttsPlayerRef.current = null;
           if (inConversationRef.current) {
             setPhase("idle");
             scheduleResumeListening();
@@ -208,7 +279,14 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
           }
         }
       },
-      [cancelSpeech, clearFallbackTimer, scheduleResumeListening]
+      [
+        cancelSpeech,
+        clearFallbackTimer,
+        scheduleResumeListening,
+        startBargeInListener,
+        stopBargeInListener,
+        speechRate,
+      ]
     );
 
     const finishVoiceTurn = useCallback(
@@ -241,6 +319,20 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
 
     const handleTranscript = useCallback(
       (transcript: string) => {
+        if (isStopSpeakingCommand(transcript)) {
+          if (interruptSpeaking()) return;
+        }
+
+        if (isRepeatCommand(transcript)) {
+          const last = lastSpokenTextRef.current;
+          if (last) {
+            void speak(last);
+          } else {
+            void speakWithBrowser("I haven't said anything yet.", speechRate);
+          }
+          return;
+        }
+
         if (isEndConversationCommand(transcript)) {
           endConversationRef.current(false);
           return;
@@ -254,18 +346,22 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
           inConversationRef.current = true;
           setInConversation(true);
           setVoiceError(null);
-          void speakWithBrowser("I'm listening. What can I help with?");
+          void speakWithBrowser("I'm listening. What can I help with?", speechRate);
           scheduleResumeListening();
           return;
         }
 
+        if (speakingRef.current) {
+          interruptSpeaking();
+        }
+
         submitVoiceMessage(transcript);
       },
-      [submitVoiceMessage, scheduleResumeListening]
+      [submitVoiceMessage, scheduleResumeListening, interruptSpeaking, speak, speechRate]
     );
 
     const beginListening = useCallback(() => {
-      if (busy || voiceTurnRef.current) return;
+      if (busy || voiceTurnRef.current || speakingRef.current) return;
 
       cancelSpeech();
       setVoiceError(null);
@@ -276,7 +372,8 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
           if (
             inConversationRef.current &&
             !voiceTurnRef.current &&
-            !busyRef.current
+            !busyRef.current &&
+            !speakingRef.current
           ) {
             scheduleResumeListening();
           }
@@ -316,7 +413,24 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
 
     startConversationRef.current = startConversation;
 
-    // Handle assistant reply after a voice turn.
+    useEffect(() => {
+      registerVoiceControl({
+        repeatLast: async () => {
+          const last = lastSpokenTextRef.current;
+          if (!last) return "Nothing to repeat yet.";
+          await speak(last);
+          return "Repeated the last response.";
+        },
+        stopSpeaking: () => {
+          if (interruptSpeaking()) return "Stopped speaking.";
+          return "I wasn't speaking.";
+        },
+        getLastSpokenText: () => lastSpokenTextRef.current,
+        speakDirect: speak,
+      });
+      return () => registerVoiceControl(null);
+    }, [speak, interruptSpeaking]);
+
     useEffect(() => {
       if (!voiceTurnRef.current) return;
 
@@ -381,11 +495,11 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
         clearFallbackTimer();
         clearThinkingTimeout();
         clearResumeListenTimer();
+        stopBargeInListener();
       },
-      [clearFallbackTimer, clearThinkingTimeout, clearResumeListenTimer]
+      [clearFallbackTimer, clearThinkingTimeout, clearResumeListenTimer, stopBargeInListener]
     );
 
-    // Auto-start conversation when the page loads (may need one tap if mic is blocked).
     useEffect(() => {
       if (!supported) return;
 
@@ -398,7 +512,6 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       return () => clearTimeout(timer);
     }, [supported]);
 
-    // Browsers require a user gesture for mic — first tap anywhere starts listening.
     useEffect(() => {
       if (!supported) return;
 
@@ -420,6 +533,11 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       setVoiceError(null);
       clearFallbackTimer();
 
+      if (speakingRef.current) {
+        interruptSpeaking();
+        return;
+      }
+
       if (inConversationRef.current) {
         endConversation(true);
         setAwaitingStart(true);
@@ -432,7 +550,7 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
         return;
       }
 
-      if (busy || phase === "speaking" || phase === "thinking") {
+      if (busy || phase === "thinking") {
         return;
       }
 
@@ -445,6 +563,7 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       clearFallbackTimer,
       startConversation,
       endConversation,
+      interruptSpeaking,
     ]);
 
     const statusHint = inConversation
@@ -463,6 +582,9 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       statusHint,
       toggleListening,
       cancelSpeech,
+      speakDirect: speak,
+      interruptSpeaking,
+      getLastSpokenText: () => lastSpokenTextRef.current,
     };
   };
 }

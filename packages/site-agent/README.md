@@ -74,6 +74,25 @@ import { createTtsHandler } from "@ais-os/site-agent/server";
 export const POST = createTtsHandler();
 ```
 
+```ts
+// src/app/api/stt/route.ts — Safari/Firefox fallback (OpenAI Whisper)
+import { createSttHandler } from "@ais-os/site-agent/server";
+
+export const POST = createSttHandler();
+```
+
+```ts
+// src/app/api/contact/route.ts — voice lead capture
+import { createContactHandler } from "@ais-os/site-agent/server";
+
+export const POST = createContactHandler({
+  getFromEmail: () => process.env.RESEND_FROM_EMAIL!,
+  getOwnerEmail: () => process.env.OWNER_EMAIL!,
+  getSiteName: () => "Acme",
+  getSiteUrl: () => "https://acme.com",
+});
+```
+
 ### 7. Voice agent
 
 ```ts
@@ -83,9 +102,74 @@ export const useVoiceAgent = createUseVoiceAgent({
   useAgent,
   useOpenChat: () => useSiteActions().setChatOpen,
   getToolConfirmation: (m) => getToolConfirmation(m, yourConfirmationMap),
-  voiceCommandNames: ["acme"], // optional wake names
+  voiceCommandNames: ["acme"],
+  enableBargeIn: true, // interrupt TTS when user speaks
 });
 ```
+
+### 8. Proactive onboarding (optional)
+
+```ts
+import { useVoiceProactivePrompts } from "@ais-os/site-agent";
+
+useVoiceProactivePrompts({
+  speak: speakDirect,
+  isInConversation: () => inConversation,
+  firstVisitMessage: "Say give me a tour or book a call.",
+});
+```
+
+### 9. Guided tour (optional)
+
+```ts
+import { useGuidedTour } from "@ais-os/site-agent";
+
+const { startTour } = useGuidedTour({
+  steps: [
+    { section: "home", message: "Welcome..." },
+    { section: "pricing", voiceId: "tier-pro", message: "Our plans..." },
+  ],
+  navigate: (s) => scrollToSection(s, SECTIONS),
+  highlight: (id) => highlightElementByVoiceId(id),
+  speak: (text) => getVoiceControl()?.speakDirect(text),
+});
+```
+
+## Fully voiced site checklist
+
+1. **`data-voice-id` on every CTA and card** — pricing tiers, service cards, FAQ items. The agent uses `highlightElement` to scroll and pulse them.
+
+```tsx
+<div
+  data-voice-id="tier-pro"
+  data-voice-label="Pro pricing tier"
+  aria-label="Pro pricing tier"
+>
+```
+
+2. **Semantic section IDs** — match `SECTIONS` map (`services` → `#services`).
+
+3. **Generic actions** — `readSection`, `highlightElement`, `repeatLast`, `stopSpeaking`, `submitLead`, `startGuidedTour`, `getFAQAnswer`.
+
+4. **`llms.txt`** at `/public/llms.txt` — content map for AI agents.
+
+5. **JSON-LD** — `ProfessionalService` + `Offer` schema on the layout.
+
+6. **Voice infra** — streaming TTS (sentence-by-sentence), barge-in, optional `/api/stt` for Safari.
+
+## Package exports
+
+| Export | Purpose |
+|--------|---------|
+| `createUseVoiceAgent` | Voice hook with streaming TTS + barge-in |
+| `registerVoiceControl` / `getVoiceControl` | Bridge for `repeatLast` / `stopSpeaking` actions |
+| `highlightElementByVoiceId` | Scroll + highlight any `data-voice-id` element |
+| `readSectionText` | Extract section text for `readSection` action |
+| `useGuidedTour` | Multi-step voice tour |
+| `useVoiceProactivePrompts` | First-visit spoken onboarding |
+| `prefersServerStt` | Detect Safari/Firefox for Whisper fallback |
+| `createContactHandler` | Resend lead email factory |
+| `createSttHandler` | OpenAI Whisper transcription factory |
 
 ## What stays site-specific
 
@@ -96,12 +180,20 @@ export const useVoiceAgent = createUseVoiceAgent({
 | `infer-intent.ts` | Regex fast-path before LLM |
 | `tool-confirmations.ts` | Spoken fallbacks per action |
 | `api/chat/route.ts` | System prompt + fallback copy |
+| `tour-config.ts` | Guided tour steps |
+| `faq.ts` | FAQ content |
 | Booking/calendar | Optional per-site plugin |
 
 ## Env vars
 
-Same as business-site: `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`, etc.
+| Var | Purpose |
+|-----|---------|
+| `ANTHROPIC_API_KEY` | Chat model |
+| `OPENAI_API_KEY` | Chat fallback + Whisper STT |
+| `ELEVENLABS_API_KEY` | TTS |
+| `RESEND_API_KEY` | Booking + lead emails |
+| Google Calendar vars | Booking slots |
 
 ## Reference implementation
 
-See `business-site/` in this repo — Omar's portfolio is the first consumer.
+See `business-site/` in this repo — Omar's portfolio is the first consumer with full voice-first features.

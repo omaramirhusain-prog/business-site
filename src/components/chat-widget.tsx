@@ -11,6 +11,10 @@ import { extractMessageText } from "@/lib/agent/extract-text";
 const ACTION_LABELS: Record<string, string> = {
   navigateTo: "Navigating",
   scrollPage: "Scrolling",
+  readSection: "Reading section",
+  highlightElement: "Highlighting",
+  repeatLast: "Repeating",
+  stopSpeaking: "Stopping",
   openChat: "Opening chat",
   closeChat: "Closing chat",
   openAppointmentBooking: "Opening booking",
@@ -18,13 +22,21 @@ const ACTION_LABELS: Record<string, string> = {
   checkAppointmentAvailability: "Checking availability",
   selectAppointmentSlot: "Selecting time",
   confirmAppointment: "Confirming booking",
+  getBookingStatus: "Checking booking",
+  rescheduleAppointment: "Rescheduling",
+  cancelAppointment: "Cancelling",
   startProject: "Starting a project",
+  submitLead: "Sending inquiry",
+  startGuidedTour: "Starting tour",
+  getFAQAnswer: "Answering",
+  controlScene: "Updating 3D scene",
+  openExternalLink: "Opening link",
 };
 
 const suggestions = [
-  "I need a website for my business",
+  "Give me a tour of the site",
   "How much does a site cost?",
-  "Can you add AI to my site?",
+  "Book a discovery call",
 ];
 
 export function ChatWidget() {

@@ -4,9 +4,12 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { ChatWidget } from "@/components/chat-widget";
 import { VoiceAgent } from "@/components/voice-agent";
+import { VoiceProactivePrompts } from "@/components/voice-proactive-prompts";
 import { AgentProvider } from "@/components/agent-provider";
 import { ActionProvider } from "@/lib/actions/registry";
 import { AppointmentModal } from "@/components/appointment-modal";
+import { SceneProvider } from "@/components/scene-context";
+import { SiteJsonLd } from "@/components/site-json-ld";
 import { siteConfig } from "@/lib/site-config";
 
 const geistSans = Geist({
@@ -61,15 +64,19 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ActionProvider>
-          <AgentProvider>
-            <Navbar />
-            {children}
-            <AppointmentModal />
-            <VoiceAgent />
-            <ChatWidget />
-          </AgentProvider>
-        </ActionProvider>
+        <SiteJsonLd />
+        <SceneProvider>
+          <ActionProvider>
+            <AgentProvider>
+              <Navbar />
+              {children}
+              <AppointmentModal />
+              <VoiceAgent />
+              <VoiceProactivePrompts />
+              <ChatWidget />
+            </AgentProvider>
+          </ActionProvider>
+        </SceneProvider>
       </body>
     </html>
   );
