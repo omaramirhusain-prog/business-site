@@ -35,7 +35,8 @@ function speakWithBrowser(text: string, rate = 1): Promise<void> {
 async function fetchAndPlayAudio(
   text: string,
   ttsEndpoint: string,
-  audioRef: { current: HTMLAudioElement | null }
+  audioRef: { current: HTMLAudioElement | null },
+  cancelled: () => boolean
 ): Promise<boolean> {
   const res = await fetch(ttsEndpoint, {
     method: "POST",
@@ -55,6 +56,9 @@ async function fetchAndPlayAudio(
       void audio.play().catch(reject);
     });
     return true;
+  } catch {
+    if (cancelled()) return false;
+    return false;
   } finally {
     URL.revokeObjectURL(url);
     audioRef.current = null;
@@ -101,7 +105,8 @@ export class StreamingTtsPlayer {
         const usedElevenLabs = await fetchAndPlayAudio(
           sentence,
           this.options.ttsEndpoint,
-          this.audioRef
+          this.audioRef,
+          () => this.cancelled
         );
         if (this.cancelled) return;
 

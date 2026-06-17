@@ -16,6 +16,7 @@ export {
   extractLastAssistantText,
   isToolTurnInProgress,
   getToolConfirmation,
+  getLastCompletedToolName,
 } from "./extract-text";
 export {
   isEndConversationCommand,
@@ -40,6 +41,7 @@ export {
   type ProactivePromptConfig,
 } from "./use-voice-proactive-prompts";
 export { prefersServerStt } from "./use-speech-recognition";
+export { setTourActive, isTourActive } from "./tour-state";
 export {
   createAgentProvider,
   type CreateAgentProviderOptions,

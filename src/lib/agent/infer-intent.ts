@@ -47,10 +47,6 @@ export function inferActionsFromUserText(text: string): InferredAction[] {
     return actions;
   }
 
-  if (/\b(give me a tour|show me around|site tour|guided tour)\b/.test(t)) {
-    actions.push({ name: "startGuidedTour", args: {} });
-  }
-
   if (/\b(read (the )?|what's on the |tell me about the )\b/.test(t)) {
     if (/\bpric/.test(t)) {
       actions.push({ name: "readSection", args: { section: "pricing" } });

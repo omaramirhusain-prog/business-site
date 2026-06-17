@@ -6,6 +6,7 @@ import { useSpeechRecognition } from "./use-speech-recognition";
 import {
   extractLastAssistantText,
   isToolTurnInProgress,
+  getLastCompletedToolName,
 } from "./extract-text";
 import {
   isEndConversationCommand,
@@ -17,6 +18,7 @@ import {
 } from "./voice-commands";
 import { StreamingTtsPlayer } from "./streaming-tts";
 import { registerVoiceControl } from "./voice-control";
+import { isTourActive } from "./tour-state";
 
 export type VoicePhase = "idle" | "listening" | "thinking" | "speaking";
 
@@ -35,6 +37,8 @@ export type UseVoiceAgentConfig = {
   awaitingStartHint?: string;
   enableBargeIn?: boolean;
   speechRate?: number;
+  /** Tools that handle their own speech (e.g. guided tour). */
+  selfSpeakingTools?: string[];
 };
 
 const MIC_ERROR_MESSAGES: Record<string, string> = {
@@ -67,6 +71,7 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
     config.awaitingStartHint ?? "Tap anywhere on the page to start talking";
   const enableBargeIn = config.enableBargeIn !== false;
   const speechRate = config.speechRate ?? 1;
+  const selfSpeakingTools = config.selfSpeakingTools ?? ["startGuidedTour"];
 
   return function useVoiceAgent() {
     const { messages, sendMessage, status, error: chatError } = config.useAgent();
@@ -199,7 +204,7 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
     );
 
     const startBargeInListener = useCallback(() => {
-      if (!enableBargeIn || typeof window === "undefined") return;
+      if (!enableBargeIn || isTourActive() || typeof window === "undefined") return;
 
       const w = window as Window & {
         SpeechRecognition?: new () => SpeechRecognition;
@@ -248,36 +253,47 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       }
     }, [enableBargeIn, interruptSpeaking, stopBargeInListener]);
 
+    const speakChainRef = useRef(Promise.resolve());
+
     const speak = useCallback(
-      async (text: string) => {
-        clearFallbackTimer();
-        cancelSpeech();
-        lastSpokenTextRef.current = text;
-        speakingRef.current = true;
-        setPhase("speaking");
-        setVoiceError(null);
+      (text: string) => {
+        const run = async () => {
+          clearFallbackTimer();
+          cancelSpeech();
+          lastSpokenTextRef.current = text;
+          speakingRef.current = true;
+          setPhase("speaking");
+          setVoiceError(null);
 
-        const player = new StreamingTtsPlayer({
-          ttsEndpoint,
-          speechRate,
-          onError: () => setVoiceError("Could not play voice response."),
-        });
-        ttsPlayerRef.current = player;
-        startBargeInListener();
+          const player = new StreamingTtsPlayer({
+            ttsEndpoint,
+            speechRate,
+            onError: () => {
+              if (!isTourActive()) {
+                setVoiceError("Could not play voice response.");
+              }
+            },
+          });
+          ttsPlayerRef.current = player;
+          startBargeInListener();
 
-        try {
-          await player.speak(text);
-        } finally {
-          speakingRef.current = false;
-          stopBargeInListener();
-          ttsPlayerRef.current = null;
-          if (inConversationRef.current) {
-            setPhase("idle");
-            scheduleResumeListening();
-          } else {
-            setPhase("idle");
+          try {
+            await player.speak(text);
+          } finally {
+            speakingRef.current = false;
+            stopBargeInListener();
+            ttsPlayerRef.current = null;
+            if (inConversationRef.current && !isTourActive()) {
+              setPhase("idle");
+              scheduleResumeListening();
+            } else if (!isTourActive()) {
+              setPhase("idle");
+            }
           }
-        }
+        };
+
+        speakChainRef.current = speakChainRef.current.then(run, run);
+        return speakChainRef.current;
       },
       [
         cancelSpeech,
@@ -288,6 +304,17 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
         speechRate,
       ]
     );
+
+    const releaseVoiceTurnWithoutSpeaking = useCallback(() => {
+      clearThinkingTimeout();
+      clearFallbackTimer();
+      voiceTurnRef.current = false;
+      setVoiceError(null);
+      if (inConversationRef.current && !isTourActive() && !speakingRef.current) {
+        setPhase("idle");
+        scheduleResumeListening();
+      }
+    }, [clearThinkingTimeout, clearFallbackTimer, scheduleResumeListening]);
 
     const finishVoiceTurn = useCallback(
       (text: string) => {
@@ -427,12 +454,20 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
         },
         getLastSpokenText: () => lastSpokenTextRef.current,
         speakDirect: speak,
+        resumeListening: () => scheduleResumeListening(),
       });
       return () => registerVoiceControl(null);
     }, [speak, interruptSpeaking]);
 
     useEffect(() => {
       if (!voiceTurnRef.current) return;
+
+      if (isTourActive()) {
+        if (!busy) {
+          releaseVoiceTurnWithoutSpeaking();
+        }
+        return;
+      }
 
       if (chatError || status === "error") {
         resetVoiceTurn("Assistant error. Try again in a moment.");
@@ -447,6 +482,11 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
 
       const reply = extractLastAssistantText(messages);
       if (reply) {
+        const toolName = getLastCompletedToolName(messages);
+        if (toolName && selfSpeakingTools.includes(toolName)) {
+          releaseVoiceTurnWithoutSpeaking();
+          return;
+        }
         finishVoiceTurn(reply);
         return;
       }
@@ -457,16 +497,26 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
         if (!fallbackTimerRef.current) {
           fallbackTimerRef.current = setTimeout(() => {
             fallbackTimerRef.current = null;
-            if (!voiceTurnRef.current) return;
+            if (!voiceTurnRef.current || isTourActive()) return;
 
             const lateReply = extractLastAssistantText(messages);
             if (lateReply) {
+              const toolName = getLastCompletedToolName(messages);
+              if (toolName && selfSpeakingTools.includes(toolName)) {
+                releaseVoiceTurnWithoutSpeaking();
+                return;
+              }
               finishVoiceTurn(lateReply);
               return;
             }
 
             const confirmation = config.getToolConfirmation(messages);
             if (confirmation) {
+              const toolName = getLastCompletedToolName(messages);
+              if (toolName && selfSpeakingTools.includes(toolName)) {
+                releaseVoiceTurnWithoutSpeaking();
+                return;
+              }
               finishVoiceTurn(confirmation);
               return;
             }
@@ -488,6 +538,8 @@ export function createUseVoiceAgent(config: UseVoiceAgentConfig) {
       finishVoiceTurn,
       resetVoiceTurn,
       clearFallbackTimer,
+      releaseVoiceTurnWithoutSpeaking,
+      selfSpeakingTools,
     ]);
 
     useEffect(

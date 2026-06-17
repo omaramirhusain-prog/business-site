@@ -5,6 +5,7 @@ export type VoiceControlApi = {
   stopSpeaking: () => string;
   getLastSpokenText: () => string | null;
   speakDirect: (text: string) => Promise<void>;
+  resumeListening?: () => void;
 };
 
 let voiceControl: VoiceControlApi | null = null;

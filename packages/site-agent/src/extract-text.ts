@@ -81,3 +81,16 @@ export function getToolConfirmation(
 
   return null;
 }
+
+/** Name of the most recent completed tool on the last assistant message. */
+export function getLastCompletedToolName(messages: UIMessage[]): string | null {
+  const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+  if (!lastAssistant) return null;
+
+  let last: string | null = null;
+  for (const part of lastAssistant.parts) {
+    if (!isToolPart(part) || toolState(part) !== "output-available") continue;
+    last = toolName(part);
+  }
+  return last;
+}
