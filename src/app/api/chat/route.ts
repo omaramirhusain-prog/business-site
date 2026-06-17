@@ -37,7 +37,7 @@ Appointments (voice-friendly booking flow):
 Rules:
 - When they ask to see or go somewhere, call navigateTo — never only describe a section.
 - When they want content read aloud, use readSection or getFAQAnswer.
-- When they want a tour, call startGuidedTour.
+- When they want a tour, call startGuidedTour once (never call it twice in the same turn).
 - When they book, call checkAppointmentAvailability or openAppointmentBooking, guide them through date → time → name → email, then confirmAppointment.
 - When they give a specific day/time, call selectAppointmentSlot immediately.
 - When they give name and email to book, call confirmAppointment.

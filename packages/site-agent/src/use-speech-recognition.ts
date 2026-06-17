@@ -63,6 +63,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const onEndRef = useRef<(() => void) | undefined>(undefined);
   const onErrorRef = useRef<((error: string) => void) | undefined>(undefined);
   const gotFinalRef = useRef(false);
+  const lastFinalRef = useRef<{ text: string; at: number } | null>(null);
 
   const stopMedia = useCallback(() => {
     mediaRecorderRef.current?.stop();
@@ -200,10 +201,20 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
 
         if (interimText) setInterim(interimText);
         if (finalText.trim()) {
+          const trimmed = finalText.trim();
+          const now = Date.now();
+          if (
+            lastFinalRef.current?.text === trimmed &&
+            now - lastFinalRef.current.at < 2000
+          ) {
+            recognition.stop();
+            return;
+          }
+          lastFinalRef.current = { text: trimmed, at: now };
           gotFinalRef.current = true;
-          setFinalTranscript(finalText.trim());
+          setFinalTranscript(trimmed);
           setInterim("");
-          onFinalRef.current(finalText.trim());
+          onFinalRef.current(trimmed);
           recognition.stop();
         }
       };

@@ -7,6 +7,18 @@ import { cn } from "@/lib/utils";
 import { useSiteActions } from "@/lib/actions/registry";
 import { useAgent } from "@/components/agent-provider";
 import { extractMessageText } from "@/lib/agent/extract-text";
+import type { UIMessage } from "ai";
+
+function visibleMessages(messages: UIMessage[]) {
+  return messages.filter((m, i) => {
+    if (i === 0) return true;
+    const prev = messages[i - 1];
+    if (m.role === "user" && prev.role === "user") {
+      return extractMessageText(m) !== extractMessageText(prev);
+    }
+    return true;
+  });
+}
 
 const ACTION_LABELS: Record<string, string> = {
   navigateTo: "Navigating",
@@ -127,18 +139,22 @@ export function ChatWidget() {
                 </div>
               )}
 
-              {messages.map((m) => {
+              {visibleMessages(messages).map((m) => {
                 const text = extractMessageText(m);
-                const toolNames = m.parts
-                  .filter(
-                    (p) =>
-                      p.type.startsWith("tool-") || p.type === "dynamic-tool"
-                  )
-                  .map((p) =>
-                    p.type === "dynamic-tool"
-                      ? (p as { toolName: string }).toolName
-                      : p.type.replace("tool-", "")
-                  );
+                const toolNames = [
+                  ...new Set(
+                    m.parts
+                      .filter(
+                        (p) =>
+                          p.type.startsWith("tool-") || p.type === "dynamic-tool"
+                      )
+                      .map((p) =>
+                        p.type === "dynamic-tool"
+                          ? (p as { toolName: string }).toolName
+                          : p.type.replace("tool-", "")
+                      )
+                  ),
+                ];
 
                 return (
                   <div key={m.id} className="space-y-2">
