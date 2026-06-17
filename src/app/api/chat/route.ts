@@ -1,15 +1,4 @@
-import {
-  streamText,
-  convertToModelMessages,
-  createUIMessageStream,
-  createUIMessageStreamResponse,
-  tool,
-  stepCountIs,
-  type UIMessage,
-  type ToolSet,
-} from "ai";
-import { openai } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createChatHandler } from "@ais-os/site-agent/server";
 import { actionDefinitions } from "@/lib/actions/definitions";
 import { siteConfig } from "@/lib/site-config";
 
@@ -45,57 +34,8 @@ Goals: understand what kind of website they need, gently qualify timeline and ro
 
 Style: friendly, confident, concise. Plain language, no jargon. Ask one question at a time. Never invent specific prices; pricing is custom.`;
 
-function getModel() {
-  if (process.env.ANTHROPIC_API_KEY) {
-    // Dated slug — "claude-3-5-haiku-latest" 404s on the Anthropic API
-    return anthropic("claude-haiku-4-5");
-  }
-  if (process.env.OPENAI_API_KEY) {
-    return openai("gpt-4o-mini");
-  }
-  return null;
-}
-
-function buildTools(): ToolSet {
-  const tools: ToolSet = {};
-  for (const def of actionDefinitions) {
-    tools[def.name] = tool({
-      description: def.description,
-      inputSchema: def.parameters,
-    });
-  }
-  return tools;
-}
-
-export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
-
-  const model = getModel();
-
-  if (!model) {
-    const stream = createUIMessageStream({
-      execute: ({ writer }) => {
-        const id = "fallback-1";
-        const text =
-          `Thanks for reaching out! The AI assistant isn't fully switched on yet, but Omar would love to hear about your project. Email ${siteConfig.email} and he'll get right back to you.`;
-        writer.write({ type: "text-start", id });
-        writer.write({ type: "text-delta", id, delta: text });
-        writer.write({ type: "text-end", id });
-      },
-    });
-    return createUIMessageStreamResponse({ stream });
-  }
-
-  const result = streamText({
-    model,
-    system: SYSTEM_PROMPT,
-    messages: await convertToModelMessages(messages),
-    tools: buildTools(),
-    stopWhen: stepCountIs(5),
-  });
-
-  return result.toUIMessageStreamResponse({
-    onError: (err) =>
-      err instanceof Error ? err.message : "Assistant request failed.",
-  });
-}
+export const POST = createChatHandler({
+  definitions: actionDefinitions,
+  systemPrompt: SYSTEM_PROMPT,
+  fallbackMessage: `Thanks for reaching out! The AI assistant isn't fully switched on yet, but Omar would love to hear about your project. Email ${siteConfig.email} and he'll get right back to you.`,
+});

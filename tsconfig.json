@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@ais-os/site-agent": ["./packages/site-agent/src/index.ts"],
+      "@ais-os/site-agent/server": ["./packages/site-agent/src/server/index.ts"]
     }
   },
   "include": [

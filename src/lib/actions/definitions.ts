@@ -1,10 +1,9 @@
 import { z } from "zod";
+import type { ActionDefinition } from "@ais-os/site-agent";
 
 /**
- * Shared action definitions — the single source of truth for what the agent
- * can do. Imported by the client registry (which attaches the runtime
- * handlers) and by the server route (which exposes them to the LLM as tools).
- * Keep this file free of React / browser code so the server can import it.
+ * Omar site actions — declare what the voice/chat agent can do.
+ * Handlers live in handlers.ts; server tools are built from this list.
  */
 
 export const SECTION_VALUES = [
@@ -16,11 +15,7 @@ export const SECTION_VALUES = [
   "contact",
 ] as const;
 
-export type ActionDefinition = {
-  name: string;
-  description: string;
-  parameters: z.ZodTypeAny;
-};
+export type { ActionDefinition };
 
 export const actionDefinitions: ActionDefinition[] = [
   {
