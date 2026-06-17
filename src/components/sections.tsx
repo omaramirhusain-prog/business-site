@@ -3,6 +3,7 @@
 import { Reveal } from "@/components/reveal";
 import { Boxes, Bot, Gauge, Sparkles, Search, Rocket } from "lucide-react";
 import { useSiteActions } from "@/lib/actions/registry";
+import { siteConfig } from "@/lib/site-config";
 
 function SectionHeading({
   eyebrow,
@@ -306,11 +307,21 @@ export function Contact() {
                   Book a call
                 </button>
                 <a
-                  href="mailto:hello@example.com"
+                  href={`mailto:${siteConfig.email}`}
                   className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
                 >
                   Email me
                 </a>
+                {siteConfig.instagram ? (
+                  <a
+                    href={siteConfig.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
+                  >
+                    Instagram
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>
@@ -328,7 +339,25 @@ export function Footer() {
           <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-accent to-accent-2 text-xs font-bold text-black">
             O
           </span>
-          <span>Omar Husain</span>
+          <span>{siteConfig.name}</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <a
+            href={`mailto:${siteConfig.email}`}
+            className="transition-colors hover:text-white"
+          >
+            {siteConfig.email}
+          </a>
+          {siteConfig.instagram ? (
+            <a
+              href={siteConfig.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-white"
+            >
+              Instagram
+            </a>
+          ) : null}
         </div>
         <p>© {new Date().getFullYear()} — Built with Next.js, 3D & AI.</p>
       </div>

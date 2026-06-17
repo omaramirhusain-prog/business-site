@@ -7,6 +7,7 @@ import { VoiceAgent } from "@/components/voice-agent";
 import { AgentProvider } from "@/components/agent-provider";
 import { ActionProvider } from "@/lib/actions/registry";
 import { AppointmentModal } from "@/components/appointment-modal";
+import { siteConfig } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,7 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://omar-web.vercel.app";
+const siteUrl = siteConfig.siteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

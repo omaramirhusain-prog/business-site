@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { bookAppointment } from "@/lib/calendar";
+import { sendBookingEmails } from "@/lib/email/booking";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,16 @@ const bodySchema = z.object({
   email: z.string().email(),
   notes: z.string().optional(),
 });
+
+function formatDateLabel(date: string) {
+  const d = new Date(`${date}T12:00:00`);
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: process.env.CALENDAR_TIMEZONE ?? "America/New_York",
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +35,21 @@ export async function POST(req: Request) {
     }
 
     const result = await bookAppointment(parsed.data);
-    return NextResponse.json(result, { status: result.ok ? 200 : 500 });
+    if (!result.ok) {
+      return NextResponse.json(result, { status: 500 });
+    }
+
+    const dateLabel = formatDateLabel(parsed.data.date);
+    const emailResult = await sendBookingEmails({
+      ...parsed.data,
+      dateLabel,
+    });
+
+    const message = emailResult.sent
+      ? `${result.message} Confirmation email sent.`
+      : result.message;
+
+    return NextResponse.json({ ...result, message, emailSent: emailResult.sent });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Booking failed.";
     return NextResponse.json({ ok: false, message }, { status: 500 });

@@ -11,6 +11,7 @@ import {
 import { openai } from "@ai-sdk/openai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { actionDefinitions } from "@/lib/actions/definitions";
+import { siteConfig } from "@/lib/site-config";
 
 export const maxDuration = 30;
 
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
       execute: ({ writer }) => {
         const id = "fallback-1";
         const text =
-          "Thanks for reaching out! The AI assistant isn't fully switched on yet, but Omar would love to hear about your project. Email hello@example.com and he'll get right back to you.";
+          `Thanks for reaching out! The AI assistant isn't fully switched on yet, but Omar would love to hear about your project. Email ${siteConfig.email} and he'll get right back to you.`;
         writer.write({ type: "text-start", id });
         writer.write({ type: "text-delta", id, delta: text });
         writer.write({ type: "text-end", id });
