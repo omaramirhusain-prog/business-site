@@ -76,7 +76,7 @@ export function Services() {
                 data-voice-id={s.voiceId}
                 data-voice-label={s.title}
                 aria-label={`${s.title} service`}
-                className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:border-accent/40 hover:bg-white/[0.04]"
+                className="depth-card group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 hover:bg-white/[0.04]"
               >
                 <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-accent/20 to-accent-2/20 text-accent">
                   <s.icon className="h-5 w-5" />
@@ -124,7 +124,7 @@ export function Work() {
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2">
           {projects.map((p, i) => (
             <Reveal key={p.name} delay={i * 0.1}>
-              <div className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+              <div className="depth-card group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
                 <div
                   className={`relative aspect-[16/10] bg-gradient-to-br ${p.accent}`}
                 >
@@ -180,7 +180,7 @@ export function Process() {
         <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
           {steps.map((s, i) => (
             <Reveal key={s.title} delay={i * 0.1}>
-              <div className="relative h-full rounded-2xl border border-white/10 bg-white/[0.02] p-7">
+              <div className="depth-card h-full rounded-2xl border border-white/10 bg-white/[0.02] p-7">
                 <div className="mb-6 flex items-center gap-4">
                   <span className="text-sm font-mono text-zinc-600">
                     0{i + 1}
@@ -255,7 +255,7 @@ export function Pricing() {
                 data-voice-id={t.voiceId}
                 data-voice-label={`${t.name} pricing tier`}
                 aria-label={`${t.name} pricing tier`}
-                className={`relative flex h-full flex-col rounded-3xl border p-7 ${
+                className={`depth-card flex h-full flex-col rounded-3xl border p-7 ${
                   t.featured
                     ? "glow border-accent/50 bg-gradient-to-b from-accent/[0.08] to-transparent"
                     : "border-white/10 bg-white/[0.02]"
