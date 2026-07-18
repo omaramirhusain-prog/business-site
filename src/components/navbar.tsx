@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSiteActions } from "@/lib/actions/registry";
 
@@ -65,12 +67,21 @@ export function Navbar() {
           ))}
         </nav>
 
-        <button
-          onClick={() => runAction("openAppointmentBooking")}
-          className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-transform hover:scale-105"
-        >
-          Book a call
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="inline-flex h-9 items-center gap-2 rounded-full px-2.5 text-sm text-zinc-400 transition-colors hover:bg-white/10 hover:text-white sm:px-3"
+          >
+            <LogIn className="h-4 w-4" />
+            <span className="hidden sm:inline">Sign in</span>
+          </Link>
+          <button
+            onClick={() => runAction("openAppointmentBooking")}
+            className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-transform hover:scale-105"
+          >
+            Book a call
+          </button>
+        </div>
       </div>
     </header>
   );
