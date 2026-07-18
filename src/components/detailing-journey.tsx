@@ -1,16 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import Image from "next/image";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { Droplets, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
-
-const Scene3D = dynamic(() => import("@/components/scene-3d"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-full w-full animate-pulse rounded-full bg-accent/10 blur-3xl" />
-  ),
-});
 
 const stages = [
   {
@@ -46,6 +39,70 @@ const stages = [
     range: [0.72, 0.86, 1],
   },
 ] as const;
+
+const visualStages = [
+  {
+    src: "/car-studio.jpg",
+    alt: "A real sports car under studio inspection lighting",
+    range: [0, 0.04, 0.2, 0.3],
+    objectPosition: "center",
+  },
+  {
+    src: "/car-wash.jpg",
+    alt: "A professional detailer pressure washing a real luxury car",
+    range: [0.18, 0.27, 0.43, 0.53],
+    objectPosition: "center",
+  },
+  {
+    src: "/car-polish.jpg",
+    alt: "A professional detailer machine polishing real automotive paint",
+    range: [0.42, 0.52, 0.68, 0.78],
+    objectPosition: "center",
+  },
+  {
+    src: "/car-studio.jpg",
+    alt: "The finished real sports car with a deep corrected gloss",
+    range: [0.68, 0.78, 0.96, 1],
+    objectPosition: "center",
+  },
+] as const;
+
+function JourneyVisual({
+  visual,
+  progress,
+  index,
+}: {
+  visual: (typeof visualStages)[number];
+  progress: ReturnType<typeof useScroll>["scrollYProgress"];
+  index: number;
+}) {
+  const opacity = useTransform(progress, visual.range, [0, 1, 1, index === 3 ? 1 : 0]);
+  const scale = useTransform(
+    progress,
+    [visual.range[0], visual.range[3]],
+    [index % 2 === 0 ? 1.12 : 1.06, index % 2 === 0 ? 1.02 : 1.14]
+  );
+  const x = useTransform(
+    progress,
+    [visual.range[0], visual.range[3]],
+    [index % 2 === 0 ? "-2%" : "2%", index % 2 === 0 ? "2%" : "-2%"]
+  );
+
+  return (
+    <motion.div style={{ opacity }} className="absolute inset-0">
+      <motion.div style={{ scale, x }} className="absolute inset-0">
+        <Image
+          src={visual.src}
+          alt={visual.alt}
+          fill
+          sizes="(max-width: 1024px) 100vw, 60vw"
+          className="object-cover"
+          style={{ objectPosition: visual.objectPosition }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function JourneyStep({
   stage,
@@ -121,11 +178,29 @@ export function DetailingJourney() {
           </div>
 
           <div className="relative h-[48vh] lg:h-[78vh]">
-            <div className="absolute inset-x-[12%] bottom-[8%] h-28 rounded-full bg-accent/10 blur-[80px]" />
-            <Scene3D progress={scrollYProgress} processMode />
+            <div className="absolute inset-0 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#050708] shadow-2xl">
+              {visualStages.map((visual, index) => (
+                <JourneyVisual
+                  key={`${visual.src}-${index}`}
+                  visual={visual}
+                  progress={scrollYProgress}
+                  index={index}
+                />
+              ))}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" />
+              <motion.div
+                animate={{ x: ["-140%", "180%"] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                className="pointer-events-none absolute inset-y-0 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-xl"
+              />
+              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+              <span className="absolute bottom-5 right-5 text-[9px] text-white/35">
+                Real detailing photography · Pexels
+              </span>
+            </div>
             <div className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
               <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-zinc-500 backdrop-blur">
-                Scroll to detail
+                Scroll through the studio
               </span>
             </div>
           </div>

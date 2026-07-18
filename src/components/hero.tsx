@@ -1,19 +1,16 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { motion } from "motion/react";
+import Image from "next/image";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useSiteActions } from "@/lib/actions/registry";
 import { ArrowDown, ArrowUpRight, Star } from "lucide-react";
 
-const Scene3D = dynamic(() => import("@/components/scene-3d"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-full w-full animate-pulse rounded-full bg-accent/10 blur-3xl" />
-  ),
-});
-
 export function Hero() {
   const { runAction } = useSiteActions();
+  const { scrollYProgress } = useScroll();
+  const carX = useTransform(scrollYProgress, [0, 0.16], ["0%", "13%"]);
+  const carScale = useTransform(scrollYProgress, [0, 0.16], [1.06, 1.16]);
+  const carOpacity = useTransform(scrollYProgress, [0, 0.14], [1, 0.35]);
 
   return (
     <section
@@ -103,8 +100,25 @@ export function Hero() {
           transition={{ duration: 1, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-0 h-[340px] w-full sm:h-[500px] lg:h-[680px]"
         >
-          <div className="absolute inset-x-[14%] bottom-[15%] h-28 rounded-full bg-accent/10 blur-[70px]" />
-          <Scene3D />
+          <motion.div
+            style={{ x: carX, scale: carScale, opacity: carOpacity }}
+            className="absolute inset-0"
+          >
+            <Image
+              src="/car-studio.jpg"
+              alt="A real Ferrari photographed in a dark detailing studio"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 60vw"
+              className="object-contain drop-shadow-[0_35px_35px_rgba(0,0,0,0.8)]"
+            />
+          </motion.div>
+          <motion.div
+            animate={{ opacity: [0.15, 0.5, 0.15], x: ["-10%", "12%", "-10%"] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+            className="pointer-events-none absolute left-[20%] top-[31%] h-[2px] w-[58%] bg-gradient-to-r from-transparent via-white/70 to-transparent blur-[1px]"
+          />
+          <div className="absolute inset-x-[14%] bottom-[15%] h-20 rounded-full bg-accent/8 blur-[70px]" />
           <div className="absolute right-2 top-[18%] hidden rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur-xl sm:block">
             <div className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">
               Signature finish
@@ -114,6 +128,9 @@ export function Hero() {
               <div className="h-full w-[92%] rounded-full bg-accent" />
             </div>
           </div>
+          <p className="absolute bottom-2 right-2 text-[9px] text-zinc-700">
+            Photo: Quentin Martinez / Pexels
+          </p>
         </motion.div>
       </div>
 

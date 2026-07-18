@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   ArrowUpRight,
   Armchair,
@@ -171,22 +172,25 @@ export function Services() {
 
 const results = [
   {
-    name: "Midnight Porsche",
-    service: "Two-stage correction + 5-year ceramic",
-    stat: "92% defect removal",
-    color: "from-[#25303a] via-[#11181d] to-[#050708]",
+    name: "Studio Finish",
+    service: "Paint inspection + ceramic protection",
+    stat: "Deep gloss restored",
+    image: "/car-studio.jpg",
+    position: "center",
   },
   {
-    name: "Heritage Bronco",
-    service: "Interior revival + exterior reset",
-    stat: "14 years reversed",
-    color: "from-[#675f4e] via-[#25251f] to-[#090a08]",
+    name: "Precision Wash",
+    service: "Safe decontamination + hand wash",
+    stat: "Contact-safe clean",
+    image: "/car-wash.jpg",
+    position: "center",
   },
   {
-    name: "Pearl Range Rover",
-    service: "New-car prep + 7-year ceramic",
-    stat: "7 years protected",
-    color: "from-[#c4cac7] via-[#4e5755] to-[#0a0d0d]",
+    name: "Surface Correction",
+    service: "Machine polish + defect removal",
+    stat: "Clarity recovered",
+    image: "/car-polish.jpg",
+    position: "center",
   },
 ];
 
@@ -207,12 +211,20 @@ export function Results() {
           {results.map((result, index) => (
             <Reveal key={result.name} delay={index * 0.08}>
               <article className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
-                <div className={`result-visual relative aspect-[4/5] bg-gradient-to-br ${result.color}`}>
-                  <div className="absolute inset-0 result-lines opacity-40" />
-                  <div className="absolute left-[10%] right-[10%] top-[34%] h-28 car-silhouette transition-transform duration-700 group-hover:scale-[1.03]">
-                    <span className="car-window" />
-                    <span className="car-wheel car-wheel-left" />
-                    <span className="car-wheel car-wheel-right" />
+                <div className="result-visual relative aspect-[4/5] overflow-hidden">
+                  <Image
+                    src={result.image}
+                    alt={`${result.name} real-world auto detailing result`}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                    style={{ objectPosition: result.position }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
+                  <div className="absolute inset-0 result-lines opacity-25" />
+                  <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-black/35 px-3 py-1.5 text-[9px] uppercase tracking-[0.16em] text-white/70 backdrop-blur">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                    Real studio work
                   </div>
                   <div className="absolute inset-x-6 bottom-6 flex items-end justify-between">
                     <span className="rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] backdrop-blur">
