@@ -2,41 +2,49 @@ import { siteConfig } from "@/lib/site-config";
 
 const offers = [
   {
-    name: "Landing",
-    description: "Single-page site with 3D hero, motion, and contact flow.",
+    name: "Exterior Reset",
+    description: "Hand wash, decontamination, wheel detail, and paint sealant.",
   },
   {
-    name: "Signature",
-    description: "Multi-page site with custom 3D and integrated AI agent.",
+    name: "Paint Correction",
+    description: "Professional swirl, haze, oxidation, and defect removal.",
   },
   {
-    name: "Custom",
-    description: "Web apps, advanced AI agents, and integrations.",
+    name: "Ceramic Coating",
+    description: "Professional 3–7 year paint protection and aftercare.",
   },
 ];
 
 export function SiteJsonLd() {
   const data = {
     "@context": "https://schema.org",
-    "@type": "ProfessionalService",
+    "@type": "AutoWash",
     name: siteConfig.name,
     url: siteConfig.siteUrl,
     email: siteConfig.email,
+    telephone: siteConfig.phone,
     description:
-      "Premium custom websites with 3D animation and integrated AI voice assistants.",
-    areaServed: "Worldwide",
-    serviceType: "Web Development",
+      "Professional auto detailing, paint correction, ceramic coating, and interior care.",
+    areaServed: "Austin, Texas",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "4107 Metric Blvd",
+      addressLocality: "Austin",
+      addressRegion: "TX",
+      addressCountry: "US",
+    },
+    priceRange: "$$",
     makesOffer: offers.map((o) => ({
       "@type": "Offer",
       name: o.name,
       description: o.description,
-      seller: { "@type": "Person", name: siteConfig.name },
+      seller: { "@type": "Organization", name: siteConfig.name },
     })),
     potentialAction: [
       {
         "@type": "ReserveAction",
         target: `${siteConfig.siteUrl}/#contact`,
-        name: "Book a discovery call",
+        name: "Book an auto detail",
       },
     ],
   };

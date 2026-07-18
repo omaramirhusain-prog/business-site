@@ -18,20 +18,20 @@ import type { SceneControls } from "@/components/scene-context";
 export const SECTIONS: SectionMap = {
   home: { id: "top", aliases: ["home", "top", "start", "beginning"] },
   services: { id: "services", aliases: ["services", "what you do", "offerings"] },
-  work: { id: "work", aliases: ["work", "projects", "portfolio", "case studies"] },
-  process: { id: "process", aliases: ["process", "how it works", "steps"] },
-  pricing: { id: "pricing", aliases: ["pricing", "price", "cost", "rates", "plans"] },
+  results: { id: "results", aliases: ["results", "gallery", "work", "transformations"] },
+  process: { id: "process", aliases: ["process", "how it works", "detailing steps"] },
+  packages: { id: "packages", aliases: ["packages", "pricing", "price", "cost", "plans"] },
   contact: { id: "contact", aliases: ["contact", "get in touch", "reach you"] },
   faq: { id: "faq", aliases: ["faq", "questions", "answers"] },
 };
 
 const COLOR_MAP: Record<string, string> = {
   blue: "#21d4fd",
-  purple: "#7c5cff",
+  purple: "#9f7aea",
   cyan: "#21d4fd",
-  violet: "#7c5cff",
+  violet: "#9f7aea",
   pink: "#e879f9",
-  green: "#34d399",
+  green: "#d8ff55",
 };
 
 export type AppointmentState = {

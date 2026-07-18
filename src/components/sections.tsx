@@ -1,7 +1,24 @@
 "use client";
 
+import {
+  ArrowUpRight,
+  Armchair,
+  BriefcaseBusiness,
+  Car,
+  Check,
+  Clock,
+  Gauge,
+  HeartHandshake,
+  MapPin,
+  Phone,
+  Quote,
+  Shield,
+  Sparkles,
+  Star,
+  Waves,
+} from "lucide-react";
 import { Reveal } from "@/components/reveal";
-import { Boxes, Bot, Gauge, Sparkles, Search, Rocket } from "lucide-react";
+import { QuoteForm } from "@/components/quote-form";
 import { useSiteActions } from "@/lib/actions/registry";
 import { siteConfig } from "@/lib/site-config";
 import { siteFaq } from "@/lib/faq";
@@ -10,82 +27,140 @@ function SectionHeading({
   eyebrow,
   title,
   subtitle,
+  align = "center",
 }: {
   eyebrow: string;
   title: string;
   subtitle?: string;
+  align?: "center" | "left";
 }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      <span className="text-sm font-medium uppercase tracking-widest text-accent">
-        {eyebrow}
-      </span>
-      <h2 className="mt-3 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+    <div className={align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-2xl"}>
+      <div
+        className={`mb-4 flex items-center gap-3 ${
+          align === "center" ? "justify-center" : ""
+        }`}
+      >
+        <span className="h-px w-8 bg-accent" />
+        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+          {eyebrow}
+        </span>
+      </div>
+      <h2 className="text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-6xl">
         {title}
       </h2>
-      {subtitle && (
-        <p className="mt-4 text-lg text-zinc-400">{subtitle}</p>
-      )}
+      {subtitle ? (
+        <p className="mt-5 text-base leading-7 text-zinc-400 sm:text-lg">{subtitle}</p>
+      ) : null}
     </div>
+  );
+}
+
+const trustPoints = [
+  ["4.9 / 5", "180+ verified reviews"],
+  ["6+ years", "Detailing Austin"],
+  ["100%", "Satisfaction promise"],
+  ["3–7 years", "Coating protection"],
+];
+
+export function TrustStrip() {
+  return (
+    <section aria-label="Why drivers trust Northline" className="border-y border-white/8 bg-white/[0.015]">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 px-6 lg:grid-cols-4 lg:px-10">
+        {trustPoints.map(([value, label], index) => (
+          <div
+            key={value}
+            className={`py-7 ${
+              index % 2 === 0 ? "border-r border-white/8" : ""
+            } ${index > 1 ? "border-t border-white/8 lg:border-t-0" : ""} ${
+              index > 0 ? "lg:border-l lg:border-white/8 lg:pl-8" : ""
+            }`}
+          >
+            <div className="text-xl font-semibold tracking-tight text-white">{value}</div>
+            <div className="mt-1 text-xs text-zinc-500">{label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
 const services = [
   {
-    icon: Boxes,
-    title: "3D & Motion",
-    voiceId: "service-3d",
-    body: "Real-time 3D scenes, scroll-driven animation, and micro-interactions that make a site feel alive.",
+    icon: Car,
+    title: "Exterior Reset",
+    price: "From $189",
+    body: "Hand wash, chemical decontamination, clay treatment, wheel detail, and a gloss sealant.",
   },
   {
-    icon: Bot,
-    title: "Integrated AI",
-    voiceId: "service-ai",
-    body: "AI agents built into the site itself: assistants that answer, qualify, and convert visitors 24/7.",
-  },
-  {
-    icon: Gauge,
-    title: "Performance",
-    voiceId: "service-performance",
-    body: "Fast where it counts. Optimized 3D, smart loading, and clean code that scores high on Lighthouse.",
+    icon: Armchair,
+    title: "Interior Revival",
+    price: "From $219",
+    body: "Deep vacuum, steam cleaning, stain treatment, leather care, and odor neutralization.",
   },
   {
     icon: Sparkles,
-    title: "Design & UX",
-    voiceId: "service-design",
-    body: "Modern, considered interfaces. Every pixel and transition earns its place.",
+    title: "Paint Correction",
+    price: "From $449",
+    body: "Measured one- or two-stage polishing to remove swirls, oxidation, haze, and light defects.",
+  },
+  {
+    icon: Shield,
+    title: "Ceramic Coating",
+    price: "From $799",
+    body: "Professional 3–7 year coatings with paint prep, infrared curing, and aftercare support.",
+  },
+  {
+    icon: Waves,
+    title: "Maintenance Detail",
+    price: "From $129",
+    body: "A recurring inside-and-out reset for protected vehicles that always need to look ready.",
+  },
+  {
+    icon: BriefcaseBusiness,
+    title: "Fleet & Business",
+    price: "Custom plans",
+    body: "Reliable on-site care and simple recurring billing for executive, rental, and sales fleets.",
   },
 ];
 
 export function Services() {
+  const { runAction } = useSiteActions();
+
   return (
-    <section id="services" className="relative py-28">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="services" className="relative py-28 sm:py-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal>
-          <SectionHeading
-            eyebrow="What I do"
-            title="Not just a website. An experience."
-            subtitle="Most sites are flat and static. I build ones that move, respond, and think."
-          />
+          <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <SectionHeading
+              eyebrow="Detailing services"
+              title="Every surface, considered."
+              subtitle="Choose a focused service or let us build the right treatment around your vehicle."
+              align="left"
+            />
+            <button
+              onClick={() => runAction("openAppointmentBooking")}
+              className="group inline-flex w-fit items-center gap-2 border-b border-white/30 pb-1 text-sm font-medium text-white transition-colors hover:border-accent hover:text-accent"
+            >
+              Get a recommendation
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </button>
+          </div>
         </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((s, i) => (
-            <Reveal key={s.title} delay={i * 0.08}>
-              <div
-                data-voice-id={s.voiceId}
-                data-voice-label={s.title}
-                aria-label={`${s.title} service`}
-                className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:border-accent/40 hover:bg-white/[0.04]"
-              >
-                <div className="mb-5 grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-accent/20 to-accent-2/20 text-accent">
-                  <s.icon className="h-5 w-5" />
+        <div className="mt-16 grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-white/8 bg-white/8 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((service, index) => (
+            <Reveal key={service.title} delay={index * 0.05}>
+              <article className="service-card group h-full bg-background p-7 sm:p-8">
+                <div className="mb-10 flex items-start justify-between">
+                  <div className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-white/[0.03] text-accent transition-colors group-hover:border-accent/50 group-hover:bg-accent/10">
+                    <service.icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs text-zinc-500">{service.price}</span>
                 </div>
-                <h3 className="text-lg font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                  {s.body}
-                </p>
-              </div>
+                <h3 className="text-xl font-semibold tracking-tight">{service.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">{service.body}</p>
+              </article>
             </Reveal>
           ))}
         </div>
@@ -94,52 +169,63 @@ export function Services() {
   );
 }
 
-const projects = [
+const results = [
   {
-    name: "This site",
-    tag: "3D + AI Assistant",
-    desc: "The page you're on. 3D hero, scroll motion, and an AI agent that qualifies leads.",
-    accent: "from-accent/30 to-accent-2/30",
+    name: "Midnight Porsche",
+    service: "Two-stage correction + 5-year ceramic",
+    stat: "92% defect removal",
+    color: "from-[#25303a] via-[#11181d] to-[#050708]",
   },
   {
-    name: "Your project",
-    tag: "Coming soon",
-    desc: "Your brand could be the next case study here. Let's build something worth showing off.",
-    accent: "from-zinc-700/40 to-zinc-800/40",
+    name: "Heritage Bronco",
+    service: "Interior revival + exterior reset",
+    stat: "14 years reversed",
+    color: "from-[#675f4e] via-[#25251f] to-[#090a08]",
+  },
+  {
+    name: "Pearl Range Rover",
+    service: "New-car prep + 7-year ceramic",
+    stat: "7 years protected",
+    color: "from-[#c4cac7] via-[#4e5755] to-[#0a0d0d]",
   },
 ];
 
-export function Work() {
+export function Results() {
   return (
-    <section id="work" className="relative py-28">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="results" className="relative overflow-hidden py-28 sm:py-36">
+      <div className="absolute inset-x-0 top-1/2 h-px bg-white/8" />
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal>
           <SectionHeading
-            eyebrow="Work"
-            title="Selected projects"
-            subtitle="A growing portfolio. Quality over quantity, always."
+            eyebrow="Recent transformations"
+            title="The finish speaks first."
+            subtitle="Correction you can see. Protection you feel every time the water beads."
           />
         </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2">
-          {projects.map((p, i) => (
-            <Reveal key={p.name} delay={i * 0.1}>
-              <div className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
-                <div
-                  className={`relative aspect-[16/10] bg-gradient-to-br ${p.accent}`}
-                >
-                  <div className="absolute inset-0 grid-bg opacity-40" />
-                  <div className="absolute bottom-4 left-4 rounded-full bg-black/40 px-3 py-1 text-xs backdrop-blur">
-                    {p.tag}
+        <div className="mt-16 grid gap-6 lg:grid-cols-3">
+          {results.map((result, index) => (
+            <Reveal key={result.name} delay={index * 0.08}>
+              <article className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+                <div className={`result-visual relative aspect-[4/5] bg-gradient-to-br ${result.color}`}>
+                  <div className="absolute inset-0 result-lines opacity-40" />
+                  <div className="absolute left-[10%] right-[10%] top-[34%] h-28 car-silhouette transition-transform duration-700 group-hover:scale-[1.03]">
+                    <span className="car-window" />
+                    <span className="car-wheel car-wheel-left" />
+                    <span className="car-wheel car-wheel-right" />
+                  </div>
+                  <div className="absolute inset-x-6 bottom-6 flex items-end justify-between">
+                    <span className="rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] backdrop-blur">
+                      {result.stat}
+                    </span>
+                    <span className="text-5xl font-light text-white/20">0{index + 1}</span>
                   </div>
                 </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold">{p.name}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                    {p.desc}
-                  </p>
+                  <h3 className="text-lg font-semibold">{result.name}</h3>
+                  <p className="mt-1.5 text-sm text-zinc-500">{result.service}</p>
                 </div>
-              </div>
+              </article>
             </Reveal>
           ))}
         </div>
@@ -148,52 +234,58 @@ export function Work() {
   );
 }
 
-const steps = [
+const reviews = [
   {
-    icon: Search,
-    title: "Discovery",
-    body: "We talk through your goals, brand, and what success looks like. The AI assistant on this site can even kick it off.",
+    quote:
+      "My black 911 looked better than the day I picked it up. They explained every step, found defects I had missed, and the finish is unreal.",
+    name: "Marcus T.",
+    vehicle: "Porsche 911 Carrera",
   },
   {
-    icon: Sparkles,
-    title: "Design & Build",
-    body: "I design and develop in tight loops, sharing progress early. 3D, motion, and AI come together here.",
+    quote:
+      "Two kids and a golden retriever had taken over the interior. Northline somehow made it feel new again—without leaving it soaked or perfumed.",
+    name: "Elena R.",
+    vehicle: "Volvo XC90",
   },
   {
-    icon: Rocket,
-    title: "Launch & Grow",
-    body: "Deploy, measure, refine. Your site ships fast and keeps improving after launch.",
+    quote:
+      "The booking was easy, the updates were clear, and there were no surprise add-ons. Six months later, the coating still beads like day one.",
+    name: "David K.",
+    vehicle: "Rivian R1T",
   },
 ];
 
-export function Process() {
+export function Reviews() {
   return (
-    <section id="process" className="relative py-28">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="reviews" className="border-y border-white/8 bg-white/[0.015] py-28">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal>
-          <SectionHeading
-            eyebrow="Process"
-            title="How we'll work together"
-          />
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <SectionHeading eyebrow="Driver stories" title="Trusted with the cars they love." align="left" />
+            <div className="flex items-center gap-2 text-sm text-zinc-400">
+              <span className="flex gap-0.5 text-accent">
+                {[0, 1, 2, 3, 4].map((star) => (
+                  <Star key={star} className="h-4 w-4 fill-current" />
+                ))}
+              </span>
+              4.9 average rating
+            </div>
+          </div>
         </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.title} delay={i * 0.1}>
-              <div className="relative h-full rounded-2xl border border-white/10 bg-white/[0.02] p-7">
-                <div className="mb-6 flex items-center gap-4">
-                  <span className="text-sm font-mono text-zinc-600">
-                    0{i + 1}
-                  </span>
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-accent/20 to-accent-2/20 text-accent">
-                    <s.icon className="h-5 w-5" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                  {s.body}
-                </p>
-              </div>
+        <div className="mt-14 grid gap-5 lg:grid-cols-3">
+          {reviews.map((review, index) => (
+            <Reveal key={review.name} delay={index * 0.08}>
+              <figure className="flex h-full flex-col rounded-3xl border border-white/10 bg-background p-7">
+                <Quote className="h-7 w-7 text-accent" />
+                <blockquote className="mt-7 flex-1 text-lg leading-8 text-zinc-200">
+                  “{review.quote}”
+                </blockquote>
+                <figcaption className="mt-9 border-t border-white/8 pt-5">
+                  <div className="font-medium text-white">{review.name}</div>
+                  <div className="mt-1 text-xs text-zinc-500">{review.vehicle}</div>
+                </figcaption>
+              </figure>
             </Reveal>
           ))}
         </div>
@@ -202,97 +294,154 @@ export function Process() {
   );
 }
 
-const tiers = [
+const packages = [
   {
-    name: "Landing",
-    voiceId: "tier-landing",
-    price: "Let's talk",
-    desc: "A single, stunning page. 3D hero, motion, and a contact flow.",
-    features: ["One-page site", "3D hero + motion", "Mobile-perfect", "Basic SEO"],
-    featured: false,
+    name: "Essential",
+    price: "$189",
+    note: "A disciplined reset",
+    duration: "2–3 hours",
+    features: [
+      "Foam pre-wash + hand wash",
+      "Wheels, tires, and jambs",
+      "Interior vacuum + wipe-down",
+      "3-month paint sealant",
+    ],
   },
   {
     name: "Signature",
-    voiceId: "tier-signature",
-    price: "Let's talk",
-    desc: "A full multi-page site with an integrated AI assistant. The flagship.",
-    features: [
-      "Multi-page site",
-      "Custom 3D experiences",
-      "Integrated AI agent",
-      "CMS + analytics",
-      "Performance tuned",
-    ],
+    price: "$349",
+    note: "Our complete inside-out detail",
+    duration: "4–6 hours",
     featured: true,
+    features: [
+      "Everything in Essential",
+      "Clay + iron decontamination",
+      "Steam and stain treatment",
+      "Leather clean + condition",
+      "6-month ceramic sealant",
+    ],
   },
   {
-    name: "Custom",
-    voiceId: "tier-custom",
-    price: "Let's talk",
-    desc: "Something ambitious? Web apps, dashboards, deeper AI. Scoped to you.",
-    features: ["Web apps", "Advanced AI agents", "Integrations", "Ongoing support"],
-    featured: false,
+    name: "Preservation",
+    price: "$799",
+    note: "Correct, coat, and keep",
+    duration: "1–2 days",
+    features: [
+      "Full Signature preparation",
+      "Single-stage paint correction",
+      "3-year ceramic coating",
+      "Glass + wheel-face coating",
+      "Annual coating inspection",
+    ],
   },
 ];
 
 export function Pricing() {
   const { runAction } = useSiteActions();
+
   return (
-    <section id="pricing" className="relative py-28">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="packages" className="relative py-28 sm:py-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <Reveal>
           <SectionHeading
-            eyebrow="Pricing"
-            title="Built for your scope"
-            subtitle="Every project is custom. Here's roughly how it breaks down. Use the chat to get a tailored quote."
+            eyebrow="Detail packages"
+            title="Straightforward care. No mystery menu."
+            subtitle="Final pricing depends on vehicle size and condition. You approve every recommendation before we begin."
           />
         </Reveal>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {tiers.map((t, i) => (
-            <Reveal key={t.name} delay={i * 0.08}>
-              <div
-                data-voice-id={t.voiceId}
-                data-voice-label={`${t.name} pricing tier`}
-                aria-label={`${t.name} pricing tier`}
-                className={`relative flex h-full flex-col rounded-3xl border p-7 ${
-                  t.featured
-                    ? "glow border-accent/50 bg-gradient-to-b from-accent/[0.08] to-transparent"
+        <div className="mt-16 grid gap-5 lg:grid-cols-3">
+          {packages.map((item, index) => (
+            <Reveal key={item.name} delay={index * 0.08}>
+              <article
+                className={`relative flex h-full flex-col rounded-3xl border p-7 sm:p-8 ${
+                  item.featured
+                    ? "border-accent/50 bg-accent/[0.055] shadow-[0_0_80px_-38px_var(--accent)]"
                     : "border-white/10 bg-white/[0.02]"
                 }`}
               >
-                {t.featured && (
-                  <span className="absolute -top-3 left-7 rounded-full bg-gradient-to-r from-accent to-accent-2 px-3 py-1 text-xs font-medium text-black">
-                    Most popular
+                {item.featured ? (
+                  <span className="absolute -top-3 left-8 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#0a0d0e]">
+                    Most booked
                   </span>
-                )}
-                <h3 className="text-lg font-semibold">{t.name}</h3>
-                <div className="mt-3 text-3xl font-semibold tracking-tight">
-                  {t.price}
+                ) : null}
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-2xl font-semibold tracking-tight">{item.name}</h3>
+                    <p className="mt-1 text-xs text-zinc-500">{item.note}</p>
+                  </div>
+                  <span className="rounded-full border border-white/10 px-3 py-1 text-[10px] text-zinc-400">
+                    {item.duration}
+                  </span>
                 </div>
-                <p className="mt-3 text-sm text-zinc-400">{t.desc}</p>
-                <ul className="mt-6 space-y-3 text-sm">
-                  {t.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-zinc-300">
-                      <span className="text-accent">✓</span>
-                      {f}
+                <div className="mt-9">
+                  <span className="text-sm text-zinc-500">From </span>
+                  <span className="text-4xl font-semibold tracking-[-0.04em]">{item.price}</span>
+                </div>
+                <ul className="mt-8 flex-1 space-y-3.5">
+                  {item.features.map((feature) => (
+                    <li key={feature} className="flex gap-3 text-sm text-zinc-300">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                      {feature}
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={() => runAction("openAppointmentBooking")}
-                  aria-label={`Get a quote for ${t.name} tier`}
-                  className={`mt-8 rounded-full px-5 py-3 text-center text-sm font-medium transition-transform hover:scale-[1.03] ${
-                    t.featured
-                      ? "bg-white text-black"
+                  className={`mt-9 rounded-full px-5 py-3.5 text-sm font-semibold transition-transform hover:scale-[1.02] ${
+                    item.featured
+                      ? "bg-accent text-[#090c0d]"
                       : "border border-white/15 text-white hover:bg-white/5"
                   }`}
                 >
-                  Get a quote
+                  Choose {item.name}
                 </button>
-              </div>
+              </article>
             </Reveal>
           ))}
+        </div>
+        <p className="mt-6 text-center text-xs text-zinc-600">
+          Oversize vehicles, heavy pet hair, excessive soil, and paint correction may affect final pricing.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+export function PromiseSection() {
+  const promises = [
+    [Gauge, "Measured work", "Paint depth, lighting, and product dwell times—not guesswork."],
+    [HeartHandshake, "No-pressure advice", "We recommend only what your vehicle actually needs."],
+    [Shield, "Insured & guaranteed", "Fully insured care backed by our satisfaction promise."],
+  ] as const;
+
+  return (
+    <section className="pb-28 sm:pb-36">
+      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#0c1213]">
+          <div className="grid lg:grid-cols-[1fr_1.2fr]">
+            <Reveal className="p-8 sm:p-12">
+              <SectionHeading
+                eyebrow="The Northline standard"
+                title="Care without shortcuts."
+                subtitle="Your vehicle is inspected, documented, and treated by a trained detailer from arrival to handoff."
+                align="left"
+              />
+            </Reveal>
+            <div className="grid border-t border-white/8 lg:border-l lg:border-t-0">
+              {promises.map(([Icon, title, body]) => (
+                <div key={title} className="flex gap-5 border-b border-white/8 p-7 last:border-b-0 sm:p-8">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{title}</h3>
+                    <p className="mt-1.5 text-sm leading-6 text-zinc-400">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -301,27 +450,37 @@ export function Pricing() {
 
 export function Faq() {
   return (
-    <section id="faq" className="relative py-28">
-      <div className="mx-auto max-w-3xl px-6">
+    <section id="faq" className="border-t border-white/8 py-28 sm:py-36">
+      <div className="mx-auto grid max-w-7xl gap-14 px-6 lg:grid-cols-[0.75fr_1.25fr] lg:px-10">
         <Reveal>
-          <SectionHeading
-            eyebrow="FAQ"
-            title="Common questions"
-            subtitle="Ask the voice assistant anything — or browse below."
-          />
+          <div className="lg:sticky lg:top-32">
+            <SectionHeading
+              eyebrow="Good to know"
+              title="Questions before the keys change hands."
+              subtitle="Still unsure what to book? Send a few photos and we’ll recommend the right starting point."
+              align="left"
+            />
+            <a
+              href={`tel:${siteConfig.phone.replace(/[^\d+]/g, "")}`}
+              className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-accent"
+            >
+              <Phone className="h-4 w-4" />
+              {siteConfig.phone}
+            </a>
+          </div>
         </Reveal>
 
-        <div className="mt-16 space-y-4">
-          {siteFaq.map((item, i) => (
-            <Reveal key={item.id} delay={i * 0.06}>
-              <details
-                data-voice-id={`faq-${item.id}`}
-                className="group rounded-2xl border border-white/10 bg-white/[0.02] p-5 open:border-accent/30"
-              >
-                <summary className="cursor-pointer list-none text-lg font-medium marker:hidden">
+        <div className="divide-y divide-white/10 border-y border-white/10">
+          {siteFaq.map((item, index) => (
+            <Reveal key={item.id} delay={index * 0.04}>
+              <details className="group py-6">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-medium marker:hidden">
                   {item.question}
+                  <span className="text-2xl font-light text-accent transition-transform group-open:rotate-45">
+                    +
+                  </span>
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                <p className="max-w-2xl pr-12 pt-4 text-sm leading-7 text-zinc-400">
                   {item.answer}
                 </p>
               </details>
@@ -334,48 +493,45 @@ export function Faq() {
 }
 
 export function Contact() {
-  const { runAction } = useSiteActions();
   return (
-    <section id="contact" className="relative py-28">
-      <div className="mx-auto max-w-4xl px-6">
+    <section id="contact" className="relative overflow-hidden border-t border-white/8 py-28 sm:py-36">
+      <div className="absolute -bottom-60 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-accent/10 blur-[150px]" />
+      <div className="relative mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-10">
         <Reveal>
-          <div className="glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-white/[0.06] to-transparent p-10 text-center sm:p-16">
-            <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-accent/20 blur-[100px]" />
-            <div className="relative">
-              <h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-                Let&apos;s build something{" "}
-                <span className="gradient-text">unforgettable</span>.
-              </h2>
-              <p className="mx-auto mt-4 max-w-md text-lg text-zinc-400">
-                Tell me about your project. The fastest way is the chat in the
-                corner, or reach me directly.
-              </p>
-              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <button
-                  onClick={() => runAction("openAppointmentBooking")}
-                  className="rounded-full bg-white px-6 py-3 text-sm font-medium text-black transition-transform hover:scale-105"
-                >
-                  Book a call
-                </button>
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
-                >
-                  Email me
-                </a>
-                {siteConfig.instagram ? (
-                  <a
-                    href={siteConfig.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
-                  >
-                    Instagram
-                  </a>
-                ) : null}
+          <div>
+            <SectionHeading
+              eyebrow="Request your detail"
+              title="Tell us what you drive."
+              subtitle="Share your vehicle, goals, and preferred date. We’ll reply with the right service and a clear estimate."
+              align="left"
+            />
+            <div className="mt-10 space-y-5 border-t border-white/10 pt-8 text-sm">
+              <a href={`tel:${siteConfig.phone.replace(/[^\d+]/g, "")}`} className="flex items-start gap-4 text-zinc-300 hover:text-white">
+                <Phone className="mt-0.5 h-4 w-4 text-accent" />
+                <span>
+                  <span className="block text-xs text-zinc-600">Call or text</span>
+                  <span className="mt-1 block">{siteConfig.phone}</span>
+                </span>
+              </a>
+              <div className="flex items-start gap-4 text-zinc-300">
+                <MapPin className="mt-0.5 h-4 w-4 text-accent" />
+                <span>
+                  <span className="block text-xs text-zinc-600">Studio</span>
+                  <span className="mt-1 block">{siteConfig.address}</span>
+                </span>
+              </div>
+              <div className="flex items-start gap-4 text-zinc-300">
+                <Clock className="mt-0.5 h-4 w-4 text-accent" />
+                <span>
+                  <span className="block text-xs text-zinc-600">Hours</span>
+                  <span className="mt-1 block">Mon–Sat, 8:00am–6:00pm</span>
+                </span>
               </div>
             </div>
           </div>
+        </Reveal>
+        <Reveal delay={0.08}>
+          <QuoteForm />
         </Reveal>
       </div>
     </section>
@@ -384,33 +540,30 @@ export function Contact() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 py-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 text-sm text-zinc-500 sm:flex-row">
-        <div className="flex items-center gap-2">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-accent to-accent-2 text-xs font-bold text-black">
-            O
-          </span>
-          <span>{siteConfig.name}</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a
-            href={`mailto:${siteConfig.email}`}
-            className="transition-colors hover:text-white"
-          >
-            {siteConfig.email}
+    <footer className="border-t border-white/10 bg-[#06090a] py-10">
+      <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 lg:px-10">
+        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+          <a href="#top" className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-full border border-accent/40 text-xs font-bold text-accent">
+              N
+            </span>
+            <span>
+              <span className="block text-sm font-semibold tracking-[0.14em]">NORTHLINE</span>
+              <span className="block text-[9px] uppercase tracking-[0.26em] text-zinc-600">Detail Co.</span>
+            </span>
           </a>
-          {siteConfig.instagram ? (
-            <a
-              href={siteConfig.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-colors hover:text-white"
-            >
-              Instagram
-            </a>
-          ) : null}
+          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-zinc-500">
+            <a href="#services" className="hover:text-white">Services</a>
+            <a href="#process" className="hover:text-white">Process</a>
+            <a href="#packages" className="hover:text-white">Packages</a>
+            <a href="#results" className="hover:text-white">Results</a>
+            <a href="#contact" className="hover:text-white">Contact</a>
+          </nav>
         </div>
-        <p>© {new Date().getFullYear()} — Built with Next.js, 3D & AI.</p>
+        <div className="flex flex-col justify-between gap-3 border-t border-white/8 pt-6 text-[11px] text-zinc-600 sm:flex-row">
+          <p>© {new Date().getFullYear()} {siteConfig.name}. Fully insured.</p>
+          <p>Austin, Texas · By appointment</p>
+        </div>
       </div>
     </footer>
   );
