@@ -9,7 +9,10 @@ import {
 } from "lucide-react";
 import { InviteClientForm } from "@/components/auth/invite-client-form";
 import { listAccounts } from "@/lib/auth/accounts";
-import { listClientInvitations } from "@/lib/auth/invitations";
+import {
+  isClientInvitationActive,
+  listClientInvitations,
+} from "@/lib/auth/invitations";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +25,7 @@ export default async function AdminDashboardPage() {
   const securedAccounts = accounts.filter(
     (account) => account.twoFactorEnabled
   );
-  const pendingInvitations = invitations.filter(
-    (invitation) =>
-      !invitation.usedAt && invitation.expiresAt.getTime() > Date.now()
-  );
+  const pendingInvitations = invitations.filter(isClientInvitationActive);
 
   const stats = [
     {
@@ -108,7 +108,7 @@ export default async function AdminDashboardPage() {
             {invitations.slice(0, 6).map((invitation) => {
               const expired =
                 !invitation.usedAt &&
-                invitation.expiresAt.getTime() <= Date.now();
+                !isClientInvitationActive(invitation);
               const status = invitation.usedAt
                 ? "Accepted"
                 : expired

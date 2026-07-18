@@ -2,7 +2,10 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { RegisterForm } from "@/components/auth/register-form";
-import { findClientInvitationByToken } from "@/lib/auth/invitations";
+import {
+  findClientInvitationByToken,
+  isClientInvitationActive,
+} from "@/lib/auth/invitations";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +18,7 @@ export default async function RegisterPage({
   const invitation = token
     ? await findClientInvitationByToken(token)
     : null;
-  const valid =
-    invitation &&
-    !invitation.usedAt &&
-    invitation.expiresAt.getTime() > Date.now();
+  const valid = invitation && isClientInvitationActive(invitation);
 
   if (!valid) {
     return (

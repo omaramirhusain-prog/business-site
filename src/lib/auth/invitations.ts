@@ -16,6 +16,13 @@ export type ClientInvitation = {
   createdAt: Date;
 };
 
+export function isClientInvitationActive(
+  invitation: ClientInvitation,
+  now = Date.now()
+) {
+  return !invitation.usedAt && invitation.expiresAt.getTime() > now;
+}
+
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
@@ -99,8 +106,7 @@ export async function isValidClientInvitation(
   const invitation = await findClientInvitationByToken(token);
   return Boolean(
     invitation &&
-      !invitation.usedAt &&
-      invitation.expiresAt.getTime() > Date.now() &&
+      isClientInvitationActive(invitation) &&
       invitation.email === normalizeEmail(email)
   );
 }

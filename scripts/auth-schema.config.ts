@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 import { betterAuth } from "better-auth";
-import { admin, twoFactor } from "better-auth/plugins";
+import { twoFactor } from "better-auth/plugins";
 import { Pool } from "pg";
 
 const database =
@@ -14,6 +14,16 @@ const database =
 
 export const auth = betterAuth({
   database,
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "client",
+        input: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
   },
@@ -22,10 +32,6 @@ export const auth = betterAuth({
     storage: "database",
   },
   plugins: [
-    admin({
-      defaultRole: "client",
-      adminRoles: ["admin"],
-    }),
     twoFactor(),
   ],
 });

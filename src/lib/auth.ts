@@ -3,7 +3,7 @@ import "server-only";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
-import { admin, twoFactor } from "better-auth/plugins";
+import { twoFactor } from "better-auth/plugins";
 import { authDatabase } from "@/lib/auth/database";
 import { sendAuthEmail } from "@/lib/auth/email";
 import {
@@ -40,6 +40,16 @@ export const auth = betterAuth({
       : undefined),
   database: authDatabase,
   trustedOrigins,
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "client",
+        input: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -125,10 +135,6 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    admin({
-      defaultRole: "client",
-      adminRoles: ["admin"],
-    }),
     twoFactor({
       issuer: `${siteConfig.name} Portal`,
       skipVerificationOnEnable: false,

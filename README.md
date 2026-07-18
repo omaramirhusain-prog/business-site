@@ -46,6 +46,8 @@ npm run auth:migrate
 
 Then start Next.js with the same `AUTH_USE_LOCAL_DB` and `AUTH_LOCAL_DB_PATH` values. `AUTH_DEV_EMAIL_MODE=console` prints verification, recovery, and invitation links only outside production.
 
+Open `/register/admin` once to create the first allowlisted administrator. After email verification, the administrator is required to enroll authenticator 2FA before `/admin` becomes accessible. Clients are created only from invitation links generated in the admin dashboard.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
