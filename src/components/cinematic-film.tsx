@@ -225,12 +225,16 @@ export function CinematicFilm() {
           style={{ opacity: washOpacity, scale: washScale }}
           className="absolute inset-0 z-[12]"
         >
-          <SceneVideo
-            playing={hot[1]}
-            src="/videos/wash.mp4"
-            poster="/posters/wash.jpg"
-            className="object-[60%_50%] sm:object-center"
-          />
+          <div className="hidden sm:block">
+            <SceneVideo playing={hot[1]} src="/videos/wash.mp4" poster="/posters/wash.jpg" />
+          </div>
+          <div className="sm:hidden">
+            <SceneVideo
+              playing={hot[1]}
+              src="/videos/wash-mobile.mp4"
+              poster="/posters/wash-mobile.jpg"
+            />
+          </div>
         </motion.div>
 
         {/* Scene 2 — paint correction, revealed by the squeegee wipe */}
