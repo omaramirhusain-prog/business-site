@@ -1,8 +1,13 @@
 "use client";
 
-import Image from "next/image";
-import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { Droplets, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
 
 const stages = [
@@ -12,7 +17,7 @@ const stages = [
     kicker: "Inspect",
     title: "We read the paint.",
     body: "Under color-matched lighting, we map swirls, scratches, stains, and every surface that needs attention.",
-    range: [0, 0.22, 0.3],
+    range: [0, 0.03, 0.2, 0.3],
   },
   {
     number: "02",
@@ -20,7 +25,7 @@ const stages = [
     kicker: "Decontaminate",
     title: "Clean past the surface.",
     body: "A foam pre-wash, two-bucket hand wash, iron removal, and clay treatment lift away bonded contamination safely.",
-    range: [0.22, 0.38, 0.5],
+    range: [0.2, 0.3, 0.45, 0.55],
   },
   {
     number: "03",
@@ -28,7 +33,7 @@ const stages = [
     kicker: "Correct",
     title: "Bring back the depth.",
     body: "Measured machine polishing removes haze and defects while preserving the integrity of your clear coat.",
-    range: [0.48, 0.63, 0.75],
+    range: [0.45, 0.55, 0.7, 0.8],
   },
   {
     number: "04",
@@ -36,7 +41,7 @@ const stages = [
     kicker: "Protect",
     title: "Lock in the finish.",
     body: "We seal every corrected surface with professional-grade protection for easier washes and lasting gloss.",
-    range: [0.72, 0.86, 1],
+    range: [0.7, 0.8, 0.97, 1],
   },
 ] as const;
 
@@ -44,87 +49,40 @@ const visualStages = [
   {
     src: "/car-studio.jpg",
     alt: "A real sports car under studio inspection lighting",
-    range: [0, 0.04, 0.2, 0.3],
     objectPosition: "center",
   },
   {
     src: "/car-wash.jpg",
     alt: "A professional detailer pressure washing a real luxury car",
-    range: [0.18, 0.27, 0.43, 0.53],
     objectPosition: "center",
   },
   {
     src: "/car-polish.jpg",
     alt: "A professional detailer machine polishing real automotive paint",
-    range: [0.42, 0.52, 0.68, 0.78],
     objectPosition: "center",
   },
   {
     src: "/car-studio.jpg",
     alt: "The finished real sports car with a deep corrected gloss",
-    range: [0.68, 0.78, 0.96, 1],
     objectPosition: "center",
   },
 ] as const;
 
-function JourneyVisual({
-  visual,
-  progress,
-  index,
-}: {
-  visual: (typeof visualStages)[number];
-  progress: ReturnType<typeof useScroll>["scrollYProgress"];
-  index: number;
-}) {
-  const opacity = useTransform(progress, visual.range, [0, 1, 1, index === 3 ? 1 : 0]);
-  const scale = useTransform(
-    progress,
-    [visual.range[0], visual.range[3]],
-    [index % 2 === 0 ? 1.12 : 1.06, index % 2 === 0 ? 1.02 : 1.14]
-  );
-  const x = useTransform(
-    progress,
-    [visual.range[0], visual.range[3]],
-    [index % 2 === 0 ? "-2%" : "2%", index % 2 === 0 ? "2%" : "-2%"]
-  );
-
-  return (
-    <motion.div style={{ opacity }} className="absolute inset-0">
-      <motion.div style={{ scale, x }} className="absolute inset-0">
-        <Image
-          src={visual.src}
-          alt={visual.alt}
-          fill
-          sizes="(max-width: 1024px) 100vw, 60vw"
-          className="object-cover"
-          style={{ objectPosition: visual.objectPosition }}
-        />
-      </motion.div>
-    </motion.div>
-  );
-}
-
 function JourneyStep({
   stage,
-  progress,
 }: {
   stage: (typeof stages)[number];
-  progress: ReturnType<typeof useScroll>["scrollYProgress"];
 }) {
-  const opacity = useTransform(
-    progress,
-    [stage.range[0], stage.range[1], stage.range[2]],
-    [0.15, 1, 0.15]
-  );
-  const y = useTransform(
-    progress,
-    [stage.range[0], stage.range[1], stage.range[2]],
-    [28, 0, -28]
-  );
   const Icon = stage.icon;
 
   return (
-    <motion.article style={{ opacity, y }} className="journey-copy">
+    <motion.article
+      initial={{ opacity: 0, y: 22 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -22 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      className="journey-copy"
+    >
       <div className="mb-5 flex items-center gap-3">
         <span className="font-mono text-xs text-accent">{stage.number}</span>
         <span className="h-px w-9 bg-accent/50" />
@@ -145,11 +103,24 @@ function JourneyStep({
 
 export function DetailingJourney() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [activeStage, setActiveStage] = useState(0);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const nextStage = Math.min(stages.length - 1, Math.floor(latest * stages.length));
+    setActiveStage((current) => (current === nextStage ? current : nextStage));
+  });
+
+  useEffect(() => {
+    visualStages.forEach(({ src }) => {
+      const image = new window.Image();
+      image.src = src;
+    });
+  }, []);
 
   return (
     <section
@@ -168,33 +139,38 @@ export function DetailingJourney() {
 
         <div className="mx-auto grid h-full max-w-7xl items-center px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-10">
           <div className="relative z-10 h-[44vh] lg:h-[52vh]">
-            {stages.map((stage) => (
+            <AnimatePresence mode="wait">
               <JourneyStep
-                key={stage.number}
-                stage={stage}
-                progress={scrollYProgress}
+                key={stages[activeStage].number}
+                stage={stages[activeStage]}
               />
-            ))}
+            </AnimatePresence>
           </div>
 
           <div className="relative h-[48vh] lg:h-[78vh]">
             <div className="absolute inset-0 overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#050708] shadow-2xl">
-              {visualStages.map((visual, index) => (
-                <JourneyVisual
-                  key={`${visual.src}-${index}`}
-                  visual={visual}
-                  progress={scrollYProgress}
-                  index={index}
-                />
-              ))}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/15" />
+              <div
+                role="img"
+                aria-label={visualStages[activeStage].alt}
+                data-stage={activeStage + 1}
+                className="absolute -inset-3 bg-cover bg-center transition-transform duration-[2400ms] ease-out"
+                style={{
+                  backgroundImage: `url("${visualStages[activeStage].src}")`,
+                  backgroundPosition: visualStages[activeStage].objectPosition,
+                  transform:
+                    activeStage % 2 === 0
+                      ? "scale(1.04) translateX(0.5%)"
+                      : "scale(1.08) translateX(-0.5%)",
+                }}
+              />
+              <div className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-t from-black/65 via-transparent to-black/15" />
               <motion.div
                 animate={{ x: ["-140%", "180%"] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-y-0 w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-xl"
+                className="pointer-events-none absolute inset-y-0 z-[3] w-1/3 rotate-12 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-xl"
               />
-              <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
-              <span className="absolute bottom-5 right-5 text-[9px] text-white/35">
+              <div className="pointer-events-none absolute inset-0 z-[4] ring-1 ring-inset ring-white/10" />
+              <span className="absolute bottom-5 right-5 z-[5] text-[9px] text-white/35">
                 Real detailing photography · Pexels
               </span>
             </div>

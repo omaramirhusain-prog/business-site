@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useSiteActions } from "@/lib/actions/registry";
 import { ArrowDown, ArrowUpRight, Star } from "lucide-react";
@@ -101,18 +100,17 @@ export function Hero() {
           className="relative z-0 h-[340px] w-full sm:h-[500px] lg:h-[680px]"
         >
           <motion.div
-            style={{ x: carX, scale: carScale, opacity: carOpacity }}
-            className="absolute inset-0"
-          >
-            <Image
-              src="/car-studio.jpg"
-              alt="A real Ferrari photographed in a dark detailing studio"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 60vw"
-              className="object-contain drop-shadow-[0_35px_35px_rgba(0,0,0,0.8)]"
-            />
-          </motion.div>
+            style={{
+              x: carX,
+              scale: carScale,
+              opacity: carOpacity,
+              backgroundImage: 'url("/car-studio.jpg")',
+            }}
+            role="img"
+            aria-label="A real Ferrari photographed in a dark detailing studio"
+            className="absolute inset-0 bg-contain bg-center bg-no-repeat drop-shadow-[0_35px_35px_rgba(0,0,0,0.8)]"
+            data-hero-car="real-photograph"
+          />
           <motion.div
             animate={{ opacity: [0.15, 0.5, 0.15], x: ["-10%", "12%", "-10%"] }}
             transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
