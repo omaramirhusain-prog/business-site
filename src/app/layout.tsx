@@ -2,10 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
-import { ChatWidget } from "@/components/chat-widget";
-import { VoiceAgent } from "@/components/voice-agent";
-import { VoiceProactivePrompts } from "@/components/voice-proactive-prompts";
-import { AgentProvider } from "@/components/agent-provider";
 import { ActionProvider } from "@/lib/actions/registry";
 import { AppointmentModal } from "@/components/appointment-modal";
 import { SceneProvider } from "@/components/scene-context";
@@ -26,30 +22,29 @@ const siteUrl = siteConfig.siteUrl;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Omar Husain — Premium Websites with 3D & AI",
+  title: "Northline Detail Co. | Premium Auto Detailing in Austin",
   description:
-    "I design and build best-in-class websites: full 3D animation, integrated AI agents, and modern UX. One developer, obsessive quality.",
+    "Paint correction, ceramic coating, interior detailing, and maintenance care for Austin drivers. Book your professional auto detail.",
   keywords: [
-    "web developer",
-    "3D websites",
-    "AI websites",
-    "React Three Fiber",
-    "Next.js developer",
-    "creative developer",
+    "auto detailing Austin",
+    "ceramic coating Austin",
+    "paint correction",
+    "interior car detailing",
+    "car detailing near me",
   ],
   openGraph: {
-    title: "Omar Husain — Premium Websites with 3D & AI",
+    title: "Northline Detail Co. | Your Car, Fully Reset",
     description:
-      "Best-in-class websites: 3D animation, integrated AI, modern UX.",
+      "Measured paint correction, ceramic protection, and obsessive interior care in Austin, Texas.",
     url: siteUrl,
-    siteName: "Omar Husain",
+    siteName: "Northline Detail Co.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Omar Husain — Premium Websites with 3D & AI",
+    title: "Northline Detail Co. | Premium Auto Detailing",
     description:
-      "Best-in-class websites: 3D animation, integrated AI, modern UX.",
+      "Your car, fully reset. Professional detailing in Austin, Texas.",
   },
 };
 
@@ -67,14 +62,9 @@ export default function RootLayout({
         <SiteJsonLd />
         <SceneProvider>
           <ActionProvider>
-            <AgentProvider>
-              <Navbar />
-              {children}
-              <AppointmentModal />
-              <VoiceAgent />
-              <VoiceProactivePrompts />
-              <ChatWidget />
-            </AgentProvider>
+            <Navbar />
+            {children}
+            <AppointmentModal />
           </ActionProvider>
         </SceneProvider>
       </body>

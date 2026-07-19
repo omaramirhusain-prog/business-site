@@ -3,11 +3,13 @@
  * Override via NEXT_PUBLIC_* env vars on Vercel.
  */
 export const siteConfig = {
-  name: "Omar Husain",
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "omar.oi.web@gmail.com",
+  name: "Northline Detail Co.",
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@northlinedetail.co",
   siteUrl:
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://omar-web-five.vercel.app",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://northlinedetail.co",
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "",
+  phone: process.env.NEXT_PUBLIC_PHONE ?? "(512) 555-0187",
+  address: process.env.NEXT_PUBLIC_ADDRESS ?? "4107 Metric Blvd, Austin, TX",
 } as const;
 
 /** Server-only owner inbox for lead / booking notifications. */

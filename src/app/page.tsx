@@ -1,22 +1,26 @@
-import { Hero } from "@/components/hero";
+import { CinematicFilm } from "@/components/cinematic-film";
 import {
-  Services,
-  Work,
-  Process,
-  Pricing,
-  Faq,
   Contact,
+  Faq,
   Footer,
+  Pricing,
+  PromiseSection,
+  Results,
+  Reviews,
+  Services,
+  TrustStrip,
 } from "@/components/sections";
 
 export default function Home() {
   return (
     <main className="relative flex-1">
-      <Hero />
+      <CinematicFilm />
+      <TrustStrip />
       <Services />
-      <Work />
-      <Process />
+      <Results />
+      <Reviews />
       <Pricing />
+      <PromiseSection />
       <Faq />
       <Contact />
       <Footer />

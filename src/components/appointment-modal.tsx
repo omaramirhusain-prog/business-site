@@ -57,7 +57,7 @@ export function AppointmentModal() {
                 <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-2 text-black">
                   <Calendar className="h-4 w-4" />
                 </div>
-                <span className="font-semibold">Book a call with Omar</span>
+                <span className="font-semibold">Book your detail</span>
               </div>
               <button
                 aria-label="Close booking"
@@ -76,7 +76,8 @@ export function AppointmentModal() {
                   </div>
                   <h3 className="text-xl font-semibold">You&apos;re booked!</h3>
                   <p className="mt-2 text-sm text-zinc-400">
-                    {activeDay?.label} at {appointmentTime}. Check your email for confirmation.
+                    {activeDay?.label} at {appointmentTime}. We&apos;ll email your
+                    confirmation and drop-off details.
                   </p>
                   <button
                     onClick={() => closeAppointment()}
@@ -88,7 +89,8 @@ export function AppointmentModal() {
               ) : (
                 <>
                   <p className="mb-4 text-sm text-zinc-400">
-                    Pick a day and time, or say it out loud — e.g. &ldquo;Tuesday at 2pm&rdquo;.
+                    Choose an arrival window. We&apos;ll confirm service length
+                    after reviewing your vehicle.
                   </p>
 
                   {appointmentSlotsLoading ? (
@@ -181,7 +183,7 @@ export function AppointmentModal() {
                     )}
                   </button>
                   <p className="mt-3 text-center text-xs text-zinc-500">
-                    Or say your name and email out loud after picking a time.
+                    Need help choosing a service? Call or text (512) 555-0187.
                   </p>
                 </>
               )}

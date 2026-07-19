@@ -7,39 +7,46 @@ export type FaqItem = {
 
 export const siteFaq: FaqItem[] = [
   {
-    id: "what-you-build",
-    question: "What kind of websites do you build?",
+    id: "how-long",
+    question: "How long will my detail take?",
     answer:
-      "Premium custom sites with 3D animation, integrated AI assistants, and modern UX. Landing pages, multi-page sites, and ambitious web apps.",
-    keywords: ["what do you build", "services", "websites"],
+      "An Essential detail usually takes 2–3 hours, Signature takes 4–6 hours, and paint correction or ceramic coating may require 1–2 days. We confirm timing after inspecting your vehicle.",
+    keywords: ["time", "how long", "duration"],
+  },
+  {
+    id: "ceramic",
+    question: "Is ceramic coating worth it?",
+    answer:
+      "Ceramic coating is a strong fit if you want durable gloss, easier maintenance washes, UV resistance, and chemical protection. It does not prevent rock chips or make paint scratch-proof, and we will never claim that it does.",
+    keywords: ["ceramic", "coating", "protection"],
+  },
+  {
+    id: "mobile",
+    question: "Do you offer mobile detailing?",
+    answer:
+      "Maintenance and fleet services can be performed mobile within our Austin service area when power, water, shade, and safe working space are available. Correction and coating work is completed in our controlled studio.",
+    keywords: ["mobile", "at home", "come to me"],
+  },
+  {
+    id: "weather",
+    question: "What happens if it rains after my appointment?",
+    answer:
+      "Rain will not undo a completed detail or cured coating. For fresh ceramic coatings, we keep the vehicle through the initial cure window and provide simple aftercare instructions before handoff.",
+    keywords: ["rain", "weather", "aftercare"],
+  },
+  {
+    id: "belongings",
+    question: "How should I prepare my vehicle?",
+    answer:
+      "Remove personal belongings, child seats, and valuables where possible. Please point out delicate trim, prior repairs, or specific concerns at drop-off. We handle the rest.",
+    keywords: ["prepare", "before appointment", "belongings"],
   },
   {
     id: "pricing",
-    question: "How much does a website cost?",
+    question: "Why might the final price change?",
     answer:
-      "Every project is scoped custom. Landing pages, full multi-page sites with AI, and custom web apps are priced based on scope. Book a discovery call for a tailored quote.",
-    keywords: ["price", "cost", "how much", "pricing"],
-  },
-  {
-    id: "timeline",
-    question: "How long does a project take?",
-    answer:
-      "Timelines depend on scope. A focused landing page can ship in a few weeks; a full site with 3D and AI typically takes longer. We'll nail down timing on the discovery call.",
-    keywords: ["timeline", "how long", "delivery"],
-  },
-  {
-    id: "ai-assistant",
-    question: "Can my site have a voice assistant like this one?",
-    answer:
-      "Yes. Integrated voice and chat agents are a core part of what I build. Visitors can navigate, book, and get answers hands-free.",
-    keywords: ["voice", "ai assistant", "chatbot"],
-  },
-  {
-    id: "process",
-    question: "What is your process?",
-    answer:
-      "Discovery to understand your goals, design and build in tight loops with early previews, then launch and refine. The assistant on this site can book the first discovery call.",
-    keywords: ["process", "how it works", "workflow"],
+      "Vehicle size, condition, heavy pet hair, biohazards, excessive soil, and the level of paint correction can affect pricing. We inspect first and get your approval before adding any work.",
+    keywords: ["price", "cost", "extra", "pricing"],
   },
 ];
 
