@@ -72,14 +72,14 @@ export function CarShowcase() {
   // Circular mask wipes in the "after" scene. Interpolate the radius as a
   // plain number so the interpolator can never fall back to a mismatched
   // clip-path shape.
-  const maskRadius = useTransform(scrollYProgress, [0.3, 0.52], [0, 130]);
+  const maskRadius = useTransform(scrollYProgress, [0.26, 0.6], [0, 130]);
   const clipPath = useMotionTemplate`circle(${maskRadius}% at 50% 55%)`;
 
   // Accent rim traced just outside the expanding circle so the reveal
   // clearly reads as a circular wipe.
   const rimRadius = useTransform(maskRadius, (r) => r + 1.1);
   const rimClip = useMotionTemplate`circle(${rimRadius}% at 50% 55%)`;
-  const rimOpacity = useTransform(scrollYProgress, [0.3, 0.32, 0.48, 0.52], [0, 1, 1, 0]);
+  const rimOpacity = useTransform(scrollYProgress, [0.26, 0.29, 0.55, 0.6], [0, 1, 1, 0]);
 
   // Scene 2: "after" marquee runs the opposite direction.
   const afterX = useTransform(scrollYProgress, [0.42, 0.85], ["-55%", "2%"]);
@@ -110,7 +110,7 @@ export function CarShowcase() {
             style={{ scale: carScale, y: carY }}
             role="img"
             aria-label="The car as it arrives, dull and swirled"
-            className="absolute -inset-[12%] [filter:saturate(0.4)_brightness(0.72)_contrast(0.95)]"
+            className="absolute -inset-[12%] [filter:saturate(0.25)_brightness(0.55)_contrast(0.92)]"
           >
             <div
               className="photo-blend absolute inset-0 bg-cover bg-center bg-no-repeat"
