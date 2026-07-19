@@ -107,7 +107,7 @@ export function CarShowcase() {
             className="absolute inset-x-[6%] inset-y-[16%] bg-contain bg-center bg-no-repeat [filter:saturate(0.4)_brightness(0.72)_contrast(0.95)]"
           >
             <div
-              className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+              className="photo-blend absolute inset-0 bg-cover bg-center bg-no-repeat"
               style={{ backgroundImage: 'url("/car-studio.jpg")' }}
             />
           </motion.div>
@@ -139,7 +139,7 @@ export function CarShowcase() {
             className="absolute inset-x-[6%] inset-y-[16%]"
           >
             <div
-              className="absolute inset-0 bg-contain bg-center bg-no-repeat [filter:saturate(1.15)_brightness(1.1)_contrast(1.06)] drop-shadow-[0_40px_45px_rgba(0,0,0,0.85)]"
+              className="photo-blend absolute inset-0 bg-cover bg-center bg-no-repeat [filter:saturate(1.15)_brightness(1.1)_contrast(1.06)]"
               style={{ backgroundImage: 'url("/car-studio.jpg")' }}
             />
           </motion.div>
@@ -181,7 +181,7 @@ export function CarShowcase() {
           <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
             Scroll to transform
           </span>
-          <div className="h-px w-40 overflow-hidden bg-white/10">
+          <div className="h-[3px] w-48 overflow-hidden rounded-full bg-white/10">
             <motion.div
               style={{ scaleX: progressScale, transformOrigin: "left" }}
               className="h-full w-full bg-accent"

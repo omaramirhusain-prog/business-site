@@ -167,6 +167,11 @@ summary {
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 62%);
   }
 
+  /* Dissolves a studio photo's hard edges into the page background */
+  .photo-blend {
+    mask-image: radial-gradient(ellipse 62% 58% at 50% 52%, #000 52%, transparent 82%);
+  }
+
   .dust {
     position: absolute;
     border-radius: 999px;
