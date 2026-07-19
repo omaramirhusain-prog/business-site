@@ -75,6 +75,12 @@ export function CarShowcase() {
   const maskRadius = useTransform(scrollYProgress, [0.3, 0.52], [0, 130]);
   const clipPath = useMotionTemplate`circle(${maskRadius}% at 50% 55%)`;
 
+  // Accent rim traced just outside the expanding circle so the reveal
+  // clearly reads as a circular wipe.
+  const rimRadius = useTransform(maskRadius, (r) => r + 1.1);
+  const rimClip = useMotionTemplate`circle(${rimRadius}% at 50% 55%)`;
+  const rimOpacity = useTransform(scrollYProgress, [0.3, 0.32, 0.48, 0.52], [0, 1, 1, 0]);
+
   // Scene 2: "after" marquee runs the opposite direction.
   const afterX = useTransform(scrollYProgress, [0.42, 0.85], ["-55%", "2%"]);
   const afterTagOpacity = useTransform(scrollYProgress, [0.52, 0.6], [0, 1]);
@@ -120,6 +126,12 @@ export function CarShowcase() {
             <p className="mt-1 text-sm text-zinc-500">Faded. Swirled. Driven hard.</p>
           </motion.div>
         </div>
+
+        {/* Accent halo just outside the circular wipe */}
+        <motion.div
+          style={{ clipPath: rimClip, opacity: rimOpacity }}
+          className="absolute inset-0 z-[14] bg-accent/60"
+        />
 
         {/* Scene 2 — the Northline finish, revealed by the circular mask */}
         <motion.div style={{ clipPath }} className="absolute inset-0 z-[15] bg-[#0a1012]">
