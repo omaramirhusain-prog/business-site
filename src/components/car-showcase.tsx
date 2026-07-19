@@ -96,7 +96,7 @@ export function CarShowcase() {
           <motion.p
             aria-hidden
             style={{ x: beforeX }}
-            className="absolute top-[16%] w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-white/[0.05]"
+            className="absolute top-[13%] w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-white/[0.06]"
           >
             {beforeWords.repeat(4)}
           </motion.p>
@@ -104,7 +104,7 @@ export function CarShowcase() {
             style={{ scale: carScale, y: carY }}
             role="img"
             aria-label="The car as it arrives, dull and swirled"
-            className="absolute inset-x-[6%] inset-y-[16%] bg-contain bg-center bg-no-repeat [filter:saturate(0.4)_brightness(0.72)_contrast(0.95)]"
+            className="absolute -inset-[12%] [filter:saturate(0.4)_brightness(0.72)_contrast(0.95)]"
           >
             <div
               className="photo-blend absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -128,7 +128,7 @@ export function CarShowcase() {
           <motion.p
             aria-hidden
             style={{ x: afterX }}
-            className="absolute top-[16%] w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-accent/[0.08]"
+            className="absolute top-[13%] w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-accent/[0.09]"
           >
             {afterWords.repeat(4)}
           </motion.p>
@@ -136,7 +136,7 @@ export function CarShowcase() {
             style={{ scale: carScale, y: carY }}
             role="img"
             aria-label="The same car after detailing, glossy under studio light"
-            className="absolute inset-x-[6%] inset-y-[16%]"
+            className="absolute -inset-[12%]"
           >
             <div
               className="photo-blend absolute inset-0 bg-cover bg-center bg-no-repeat [filter:saturate(1.15)_brightness(1.1)_contrast(1.06)]"
