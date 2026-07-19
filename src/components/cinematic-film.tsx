@@ -225,7 +225,12 @@ export function CinematicFilm() {
           style={{ opacity: washOpacity, scale: washScale }}
           className="absolute inset-0 z-[12]"
         >
-          <SceneVideo playing={hot[1]} src="/videos/wash.mp4" poster="/posters/wash.jpg" />
+          <SceneVideo
+            playing={hot[1]}
+            src="/videos/wash.mp4"
+            poster="/posters/wash.jpg"
+            className="object-[60%_50%] sm:object-center"
+          />
         </motion.div>
 
         {/* Scene 2 — paint correction, revealed by the squeegee wipe */}
@@ -241,7 +246,7 @@ export function CinematicFilm() {
         </motion.div>
         <motion.div
           style={{ left: wipeEdgeLeft, opacity: wipeEdgeOpacity }}
-          className="pointer-events-none absolute inset-y-0 z-[14] w-1 -translate-x-1/2 bg-gradient-to-b from-transparent via-white/90 to-transparent shadow-[0_0_28px_6px_rgba(255,255,255,0.45)]"
+          className="pointer-events-none absolute inset-y-0 z-[14] w-1.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-white/90 to-transparent shadow-[0_0_36px_10px_rgba(255,255,255,0.55)] sm:w-1 sm:shadow-[0_0_28px_6px_rgba(255,255,255,0.45)]"
         />
 
         {/* Door-iris rim tracing the way into the cabin */}
