@@ -1,6 +1,5 @@
 import { Hero } from "@/components/hero";
-import { CarShowcase } from "@/components/car-showcase";
-import { DetailingJourney } from "@/components/detailing-journey";
+import { ProcessFilm } from "@/components/process-film";
 import {
   Contact,
   Faq,
@@ -17,10 +16,9 @@ export default function Home() {
   return (
     <main className="relative flex-1">
       <Hero />
-      <CarShowcase />
+      <ProcessFilm />
       <TrustStrip />
       <Services />
-      <DetailingJourney />
       <Results />
       <Reviews />
       <Pricing />
