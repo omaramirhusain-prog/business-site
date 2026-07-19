@@ -1,5 +1,4 @@
-import { Hero } from "@/components/hero";
-import { ProcessFilm } from "@/components/process-film";
+import { CinematicFilm } from "@/components/cinematic-film";
 import {
   Contact,
   Faq,
@@ -15,8 +14,7 @@ import {
 export default function Home() {
   return (
     <main className="relative flex-1">
-      <Hero />
-      <ProcessFilm />
+      <CinematicFilm />
       <TrustStrip />
       <Services />
       <Results />
