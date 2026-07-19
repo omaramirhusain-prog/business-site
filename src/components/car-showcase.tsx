@@ -96,7 +96,7 @@ export function CarShowcase() {
           <motion.p
             aria-hidden
             style={{ x: beforeX }}
-            className="absolute top-[13%] w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-white/[0.06]"
+            className="absolute top-[13%] z-10 w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-white/[0.05] mix-blend-screen"
           >
             {beforeWords.repeat(4)}
           </motion.p>
@@ -122,13 +122,13 @@ export function CarShowcase() {
         </div>
 
         {/* Scene 2 — the Northline finish, revealed by the circular mask */}
-        <motion.div style={{ clipPath }} className="absolute inset-0 bg-[#0a1012]">
+        <motion.div style={{ clipPath }} className="absolute inset-0 z-[15] bg-[#0a1012]">
           <div className="absolute inset-0 road-grid opacity-30" />
           <div className="absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.07] blur-[110px]" />
           <motion.p
             aria-hidden
             style={{ x: afterX }}
-            className="absolute top-[13%] w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-accent/[0.09]"
+            className="absolute top-[13%] z-10 w-max whitespace-nowrap text-[13vw] font-bold leading-none tracking-tight text-accent/[0.07] mix-blend-screen"
           >
             {afterWords.repeat(4)}
           </motion.p>
