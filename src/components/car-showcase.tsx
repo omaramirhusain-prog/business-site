@@ -83,8 +83,8 @@ export function CarShowcase() {
 
   // Scene 2: "after" marquee runs the opposite direction.
   const afterX = useTransform(scrollYProgress, [0.42, 0.85], ["-55%", "2%"]);
-  const afterTagOpacity = useTransform(scrollYProgress, [0.52, 0.6], [0, 1]);
-  const glowOpacity = useTransform(scrollYProgress, [0.5, 0.62], [0, 1]);
+  const afterTagOpacity = useTransform(scrollYProgress, [0.58, 0.66], [0, 1]);
+  const glowOpacity = useTransform(scrollYProgress, [0.28, 0.4], [0, 1]);
 
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
@@ -135,8 +135,8 @@ export function CarShowcase() {
 
         {/* Scene 2 — the Northline finish, revealed by the circular mask */}
         <motion.div style={{ clipPath }} className="absolute inset-0 z-[15] bg-[#0a1012]">
-          <div className="absolute inset-0 road-grid opacity-30" />
-          <div className="absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.07] blur-[110px]" />
+          <div className="absolute inset-0 road-grid opacity-60" />
+          <div className="absolute left-1/2 top-1/2 h-[90vmin] w-[90vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.13] blur-[110px]" />
           <motion.p
             aria-hidden
             style={{ x: afterX }}
