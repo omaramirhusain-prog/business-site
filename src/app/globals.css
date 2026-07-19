@@ -169,7 +169,7 @@ summary {
 
   /* Dissolves a studio photo's hard edges into the page background */
   .photo-blend {
-    mask-image: radial-gradient(ellipse 62% 58% at 50% 52%, #000 52%, transparent 82%);
+    mask-image: radial-gradient(ellipse 85% 80% at 50% 52%, #000 55%, transparent 98%);
   }
 
   .dust {
